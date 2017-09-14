@@ -40,54 +40,50 @@ int scannedNetworks, scanssid;
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 1, 1);
 
-String getContentType(String filename) {
-  if (server.hasArg("download")) return "application/octet-stream";
-  else if (filename.endsWith(".htm")) return "text/html";
-  else if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css")) return "text/css";
-  else if (filename.endsWith(".js")) return "application/javascript";
-  else if (filename.endsWith(".png")) return "image/png";
-  else if (filename.endsWith(".gif")) return "image/gif";
-  else if (filename.endsWith(".jpg")) return "image/jpeg";
-  else if (filename.endsWith(".ico")) return "image/x-icon";
-  else if (filename.endsWith(".xml")) return "text/xml";
-  else if (filename.endsWith(".pdf")) return "application/x-pdf";
-  else if (filename.endsWith(".zip")) return "application/x-zip";
-  else if (filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
-}//String getContentType
-
 bool handleFileRead(String path) {
   if (path.endsWith("/")) path += "index.htm";
-  String contentType = getContentType(path);
-  String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) {
-    if (SPIFFS.exists(pathWithGz))
-      path += ".gz";
-    Serial.println(path);
-    File file = SPIFFS.open(path, "r");
+  String contentType;
+  if (server.hasArg("download")) contentType = "application/octet-stream";
+  else if (filename.endsWith(".htm")) contentType = "text/html";
+  else if (filename.endsWith(".html")) contentType = "text/html";
+  else if (filename.endsWith(".css")) contentType = "text/css";
+  else if (filename.endsWith(".js")) contentType = "application/javascript";
+  else if (filename.endsWith(".png")) contentType = "image/png";
+  else if (filename.endsWith(".gif")) contentType = "image/gif";
+  else if (filename.endsWith(".jpg")) contentType = "image/jpeg";
+  else if (filename.endsWith(".ico")) contentType = "image/x-icon";
+  else if (filename.endsWith(".xml")) contentType = "text/xml";
+  else if (filename.endsWith(".pdf")) contentType = "application/x-pdf";
+  else if (filename.endsWith(".zip")) contentType = "application/x-zip";
+  else if (filename.endsWith(".gz")) contentType = "application/x-gzip";
+  else contentType = "text/plain";
+  String pathGz = path + ".gz";
+  if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
+    File file = SPIFFS.open(SPIFFS.exists(pathGz)?pathGz:path, "r");
     size_t sent = server.streamFile(file, contentType);
     file.close();
     return true;
-  }
+  }//if SPIFFS.exists
   return false;
 }//bool handleFileRead
 
 void setup() {
+  Serial.begin(115200); //for terminal debugging
+
+  //set up temperature sensors and relay output
   temperatureSensors.begin();
   temperatureSensors.requestTemperatures();
   myPID.setBangBang(4);
   myPID.setTimeStep(4000);
-  Serial.begin(115200); //for terminal debugging
-  delay(10);
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, HIGH);
 
+  //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin();
   unsigned long connectTime = millis();
   while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED) delay(10);
-
+  //if timed out, switch to AP mode
   if (WiFi.status() != WL_CONNECTED) {
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
@@ -149,14 +145,12 @@ void setup() {
     Serial.println(server.uri());
     for (int i = 0; i < server.args(); i++)
       Serial.println(server.argName(i) + ":::" + server.arg(i));
-  });
-
+  }); //server.on io
+  
   SSDPSetup(server, "NodeMCU (" + WiFi.localIP().toString() + ")");  //SSDP allows device to show up on windows network
   server.begin();
-
   Serial.println("setup complete.");
 }//void setup
-
 
 void loop() {
   dnsServer.processNextRequest();
@@ -170,6 +164,5 @@ void loop() {
     myPID.stop();
     digitalWrite(RELAY_PIN, HIGH);
   }
-
 }//void loop
 
