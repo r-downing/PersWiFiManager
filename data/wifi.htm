@@ -1,0 +1,149 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WiFi Settings2</title>
+<style>
+body {
+	margin:0px
+}
+button {
+	display:block;
+	text-align:center;
+}
+.box1{
+    display: block;
+    width: 18em;
+    height: auto;
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    background-color: lightgrey;
+    padding: .25em;
+	margin:1%;
+}
+.box3{
+    margin: .25em;
+    padding: .25em;
+    background-color: white;
+    border: 0px solid;
+    border-radius: 10px;
+}
+.box4{
+	font-weight: bold;
+}
+
+@media only screen and (max-width: 600px) {
+    /* For mobile phones: */
+    .box1 {
+	    display: block;
+	height: auto;
+	padding: .25em;
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    background-color: lightgrey;
+    width: 96%;
+	margin:1%;
+    }
+}
+
+</style>
+<script type="text/javascript">
+
+function updateInfo(){
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var data = JSON.parse(this.responseText);
+			document.getElementById("wifiStatus").innerHTML = (data.connected)?("Connected to "+ data.connected):"not connected";
+			var wifiList = document.getElementById("wifiList");
+			wifiList.innerHTML="";
+			for(i=0;i<data.networks.length;i++){
+				var _li = document.createElement("div");
+				_li.classList.add("box3");
+				_li.appendChild(document.createTextNode(data.networks[i].ssid));
+				_li.appendChild(document.createElement("br"));
+				_li.appendChild(document.createTextNode(
+														(((data.networks[i].encrypted)?"\uD83D\uDD12 ":"\u26a0 ")+"\uD83D\uDCF6="+data.networks[i].signal)
+														+((data.connected)?((data.connected==data.networks[i].ssid)?" connected.":""):"")
+														));
+				_li.onclick= function(network, n) {
+					return function() {
+						var formData = new FormData();
+						formData.append("ssidn",n);
+						if(network.encrypted) {
+							var pw=prompt("Enter password for "+network.ssid);
+							if(pw==null) return;
+							formData.append("password",pw);
+						}
+						if(confirm("Connect to "+network.ssid+"?")) sendSettings(formData);
+					}
+				}(data.networks[i], i);
+				wifiList.appendChild(_li);
+			}
+		}
+	};
+	xhttp.open("GET", "/wifi?list=", true);
+	xhttp.send();
+}
+
+function manualWifi(){
+	var formData = new FormData();
+	var ssid=prompt("Enter network name");
+	if(ssid==null || ssid.length==0) return;
+	formData.append("ssid",ssid);
+	var pw=prompt("Enter password (blank for open wifi)");
+	if(pw==null) return;
+	if(pw.length) formData.append("password",pw);
+	sendSettings(formData);	
+}
+
+function WPS(){
+	if(confirm("Press WPS button on router, then press OK")){
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				document.body.innerHTML="attempting WPS...";
+			}
+		};
+		xhttp.open("GET","/wifi?wps=")
+		xhttp.send();
+	}
+}
+
+function rescan(){
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET","/wifi?rescan=")
+	xhttp.send();
+	document.getElementById("wifiList").innerHTML="Scanning...";
+	setTimeout(updateInfo, 2000);
+}
+
+function sendSettings(fd){
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("PUT", "/wifi");
+	xhttp.send(fd);
+}
+
+function pageLoadFxn(){
+	updateInfo();
+}
+
+
+
+</script>
+</head>
+
+<body onload="pageLoadFxn()">
+
+<div class="box1">
+<div class="box3">
+	Status: <br>
+	<em id="wifiStatus">...</em>
+</div>
+<br>
+<div class="box3 box4" onclick="rescan()">WiFi Networks (Re-Scan &#8635;)</div>
+<div id="wifiList">Loading...</div>
+<div class="box3 box4" onclick="manualWifi()">Manual...</div>
+<div class="box3 box4" onclick="WPS()">WPS Setup</div>
+</div>
+</body>
+</html>
