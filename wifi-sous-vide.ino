@@ -88,7 +88,7 @@ void setup() {
   if (WiFi.status() != WL_CONNECTED) {
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    WiFi.softAP("ESP8266 WiFi Setup");
+    WiFi.softAP("Sous Vide WiFi");
   }
   dnsServer.start((byte)53, "*", apIP);
 
@@ -148,7 +148,17 @@ void setup() {
       Serial.println(server.argName(i) + ":::" + server.arg(i));
   }); //server.on io
   
-  SSDPSetup(server, "NodeMCU (" + WiFi.localIP().toString() + ")");  //SSDP allows device to show up on windows network
+  //SSDPSetup(server, "NodeMCU (" + WiFi.localIP().toString() + ")");  //SSDP allows device to show up on windows network
+  webServer.on("/description.xml", HTTP_GET, [&]() {
+    SSDP.schema(server.client());
+  });
+  SSDP.setSchemaURL("description.xml");
+  SSDP.setHTTPPort(80);
+  SSDP.setName("NodeMCU (" + WiFi.localIP().toString() + ")");
+  SSDP.setURL("/");
+  SSDP.begin();
+  SSDP.setDeviceType("upnp:rootdevice");
+  
   server.begin();
   Serial.println("setup complete.");
 }//void setup
