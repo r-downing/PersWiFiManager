@@ -45,18 +45,18 @@ bool handleFileRead(String path) {
   if (path.endsWith("/")) path += "index.htm";
   String contentType;
   if (server.hasArg("download")) contentType = "application/octet-stream";
-  else if (filename.endsWith(".htm")) contentType = "text/html";
-  else if (filename.endsWith(".html")) contentType = "text/html";
-  else if (filename.endsWith(".css")) contentType = "text/css";
-  else if (filename.endsWith(".js")) contentType = "application/javascript";
-  else if (filename.endsWith(".png")) contentType = "image/png";
-  else if (filename.endsWith(".gif")) contentType = "image/gif";
-  else if (filename.endsWith(".jpg")) contentType = "image/jpeg";
-  else if (filename.endsWith(".ico")) contentType = "image/x-icon";
-  else if (filename.endsWith(".xml")) contentType = "text/xml";
-  else if (filename.endsWith(".pdf")) contentType = "application/x-pdf";
-  else if (filename.endsWith(".zip")) contentType = "application/x-zip";
-  else if (filename.endsWith(".gz")) contentType = "application/x-gzip";
+  else if (path.endsWith(".htm")) contentType = "text/html";
+  else if (path.endsWith(".html")) contentType = "text/html";
+  else if (path.endsWith(".css")) contentType = "text/css";
+  else if (path.endsWith(".js")) contentType = "application/javascript";
+  else if (path.endsWith(".png")) contentType = "image/png";
+  else if (path.endsWith(".gif")) contentType = "image/gif";
+  else if (path.endsWith(".jpg")) contentType = "image/jpeg";
+  else if (path.endsWith(".ico")) contentType = "image/x-icon";
+  else if (path.endsWith(".xml")) contentType = "text/xml";
+  else if (path.endsWith(".pdf")) contentType = "application/x-pdf";
+  else if (path.endsWith(".zip")) contentType = "application/x-zip";
+  else if (path.endsWith(".gz")) contentType = "application/x-gzip";
   else contentType = "text/plain";
   String pathGz = path + ".gz";
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
@@ -148,13 +148,12 @@ void setup() {
       Serial.println(server.argName(i) + ":::" + server.arg(i));
   }); //server.on io
   
-  //SSDPSetup(server, "NodeMCU (" + WiFi.localIP().toString() + ")");  //SSDP allows device to show up on windows network
-  webServer.on("/description.xml", HTTP_GET, [&]() {
+  server.on("/description.xml", HTTP_GET, [&]() {
     SSDP.schema(server.client());
   });
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
-  SSDP.setName("NodeMCU (" + WiFi.localIP().toString() + ")");
+  SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
   SSDP.setURL("/");
   SSDP.begin();
   SSDP.setDeviceType("upnp:rootdevice");
