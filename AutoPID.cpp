@@ -1,6 +1,5 @@
 #include "AutoPID.h"
 
-
 AutoPID::AutoPID(double *input, double *setpoint, double *output, double outputMin, double outputMax,
                  double Kp, double Ki, double Kd) {
   _input = input;
@@ -78,7 +77,6 @@ void AutoPID::reset() {
   _integral = 0;
   _previousError = 0;
 }
-
 
 void AutoPIDRelay::run() {
   AutoPID::run();

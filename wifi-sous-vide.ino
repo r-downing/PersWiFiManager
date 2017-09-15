@@ -40,6 +40,7 @@ int scannedNetworks, scanssid;
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 1, 1);
 
+//code from fsbrowser example, consolidated.
 bool handleFileRead(String path) {
   if (path.endsWith("/")) path += "index.htm";
   String contentType;
