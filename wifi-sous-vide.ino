@@ -34,7 +34,7 @@ void updateTemperature() {
     lastTempUpdate = millis();
     temperatureSensors.requestTemperatures();
   }
-}
+}//void updateTemperature
 
 int scannedNetworks, scanssid;
 DNSServer dnsServer;
@@ -90,8 +90,9 @@ void setup() {
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
   }
-  dnsServer.start((byte)53, "*", apIP);
+  dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
 
+  //allows serving of files from SPIFFS
   SPIFFS.begin();
   server.onNotFound([]() {
     if (!handleFileRead(server.uri()))
@@ -100,9 +101,12 @@ void setup() {
       } else server.send(200, "text/plain", "FileNotFound");
   }); //server.onNotFound
 
+  //run a scan for wifi networks on setup
   scannedNetworks = WiFi.scanNetworks();
+
+  //handles wifi commands and data
   server.on("/wifi", []() {
-    if (server.hasArg("list")) {
+    if (server.hasArg("list")) { //sends scanned list of wifi networks in JSON format
       server.setContentLength(CONTENT_LENGTH_UNKNOWN);
       server.send(200, "application/json", "");
       String cssid = WiFi.SSID();
@@ -118,16 +122,19 @@ void setup() {
                           );
       }//for
       server.client().stop();
-    } else if (server.hasArg("wps")) {
+      
+    } else if (server.hasArg("wps")) { //starts WPS setup mode, then reboots
       server.send(200, "text/html", "WPS");
       WiFi.mode(WIFI_STA);
       WiFi.beginWPSConfig();
       delay(100);
       ESP.restart();
-    } else if (server.hasArg("rescan")) {
+      
+    } else if (server.hasArg("rescan")) { //re-scans wifi networks
       scannedNetworks = WiFi.scanNetworks();
       server.send(200, "text/html", "rescan");
-    } else if (server.hasArg("ssid") || server.hasArg("ssidn")) {
+      
+    } else if (server.hasArg("ssid") || server.hasArg("ssidn")) { //connects to specified wifi network, then reboots
       WiFi.mode(WIFI_STA);
       String ssid = server.hasArg("ssid") ? server.arg("ssid") : WiFi.SSID(server.arg("ssidn").toInt());
       server.hasArg("password") ? WiFi.begin(ssid.c_str(), server.arg("password").c_str()) : WiFi.begin(ssid.c_str());
@@ -136,6 +143,7 @@ void setup() {
     }//endif
   });//server.on wifi
 
+  //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
     if (server.hasArg("setTemp")) {
       setTemp = server.arg("setTemp").toFloat();
@@ -147,10 +155,9 @@ void setup() {
     for (int i = 0; i < server.args(); i++)
       Serial.println(server.argName(i) + ":::" + server.arg(i));
   }); //server.on io
-  
-  server.on("/description.xml", HTTP_GET, [&]() {
-    SSDP.schema(server.client());
-  });
+
+  //SSDP makes device visible on windows network
+  server.on("/description.xml", HTTP_GET, [&]() {SSDP.schema(server.client());});
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
