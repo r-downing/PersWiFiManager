@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Sous Vide Control</title>
+	<script src="jquery-3.2.1.min.js"></script>
+	<script src="charts.min.js"></script>
+	<script>
+
+		function setIntervalI(fn, t){
+			fn();
+			return setInterval(fn, t);
+		}
+
+		$( document ).ready(function() {
+
+			$('#setTempForm').submit(function(e){
+				e.preventDefault();
+				$('#currentSetTemp').html("...");
+				config.data.datasets[0].data=[];
+				config.data.datasets[1].data=[];
+				config.data.labels=[];
+				window.myLine.update();
+				$.post("/io",$(this).serialize()).done(updateDisplay);
+			});
+
+			window.setIntervalI(function(){
+				$.get("/io",updateDisplay);
+			},5000);
+
+		});
+
+		function updateDisplay(data){
+			$('#currentSetTemp').html(data.setTemp);
+			config.data.datasets[0].data.push(data.setTemp);
+			config.data.datasets[1].data.push(data.temperature);
+			d=new Date();
+			config.data.labels.push(d.toLocaleTimeString());
+			$("#power").html(data.power)
+			$("#temperature").html(data.temperature)
+			window.myLine.update();
+		}
+
+	</script>
+	<style>
+		#canvasContainer {
+			width: 100%;
+		}
+		#canvas {
+			width:inherit;
+		}
+		body {width:100%; height:100%; margin:0;}
+		@media only screen and (max-width: 768px) {
+			body {
+				font-size: 20px;
+			}
+		}
+
+		@media only screen and (max-width: 320px) {
+			body {
+				font-size: 10px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+Current Set Point: <span id="currentSetTemp"></span>
+<form id="setTempForm">
+	Set Temperature:<br>
+	<input type="number" name="setTemp" step=".1" min="0"/>
+	<input type="submit" value="Set"/>
+</form>
+
+Current Temperature: <span id="temperature"></span><br>
+Power Level: <span id="power"></span><br>
+
+<br>
+<a href="/wifi.htm">WiFi Settings</a>
+
+<div id="canvasContainer">
+	<canvas id="canvas"></canvas>
+</div>
+<script>
+	var config = {
+		type: 'line',
+		data: {
+			labels: [],
+			datasets: [{
+				backgroundColor: 'rgba(255, 9, 12, 0.2)',
+				borderColor: 'rgba(255, 99, 132, 0.2)',
+				data: [],
+				fill: false,
+			}, {
+				fill: false,
+				backgroundColor: 'rgba(5, 199, 32, 0.2)',
+				borderColor: 'rgba(255, 199, 132, 0.2)',
+				data: [],
+			}]
+		},
+		options: {
+			responsive: true,
+			title:{
+				display:false,
+			},
+			legend:{
+				display:false,
+			},
+			tooltips: {
+				mode: 'index',
+				intersect: false,
+			},
+			hover: {
+				mode: 'nearest',
+				intersect: true
+			},
+			scales: {
+				xAxes: [{
+					time: { unit: 'second'}
+				}],
+				yAxes: [{
+					display: true,
+					scaleLabel: {
+						display: true,
+						labelString: 'Temperature (F)'
+					}
+				}]
+			}
+		}
+	};
+	var ctx = document.getElementById("canvas").getContext("2d");
+	window.myLine = new Chart(ctx, config);
+</script>
+
+</body>
+
+</html>
