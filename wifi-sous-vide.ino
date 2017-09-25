@@ -21,8 +21,6 @@ DallasTemperature temperatureSensors(&oneWire);
 double temperature, setTemp;// = 5, actual_temperature = 0, previous_temperature = 0, setTemp, setP;
 unsigned long timeAtTemp;
 
-ESP8266WebServer server(80);
-
 bool relayControl;
 AutoPIDRelay myPID(&temperature, &setTemp, &relayControl, 5000, .12, .0003, 0);
 
@@ -35,9 +33,9 @@ void updateTemperature() {
   }
 }//void updateTemperature
 
+ESP8266WebServer server(80);
 int scannedNetworks, scanssid;
 DNSServer dnsServer;
-IPAddress apIP(192, 168, 1, 1);
 
 //code from fsbrowser example, consolidated.
 bool handleFileRead(String path) {
@@ -67,17 +65,8 @@ bool handleFileRead(String path) {
   return false;
 }//bool handleFileRead
 
-void setup() {
-  Serial.begin(115200); //for terminal debugging
-
-  //set up temperature sensors and relay output
-  temperatureSensors.begin();
-  temperatureSensors.requestTemperatures();
-  myPID.setBangBang(4);
-  myPID.setTimeStep(4000);
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, HIGH);
-
+void networkSetup(){
+  IPAddress apIP(192, 168, 1, 1);
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin();
@@ -156,15 +145,26 @@ void setup() {
   }); //server.on io
 
   //SSDP makes device visible on windows network
-  server.on("/description.xml", HTTP_GET, [&]() {
-    SSDP.schema(server.client());
-  });
+  server.on("/description.xml", HTTP_GET, [&]() { SSDP.schema(server.client()); });
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
   SSDP.setURL("/");
   SSDP.begin();
   SSDP.setDeviceType("upnp:rootdevice");
+}//void networkSetup
+
+void setup() {
+  Serial.begin(115200); //for terminal debugging
+
+  //set up temperature sensors and relay output
+  temperatureSensors.begin();
+  temperatureSensors.requestTemperatures();
+  myPID.setBangBang(4);
+  myPID.setTimeStep(4000);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH);
+  networkSetup();
 
   server.begin();
   Serial.println("setup complete.");
