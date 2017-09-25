@@ -6,6 +6,11 @@
 	<script src="jquery-3.2.1.min.js"></script>
 	<script>
 
+		var tRefresh = 0;
+		setInterval(function(){
+			$('#tRefresh').html("Last updated "+(tRefresh++)+" seconds ago").css('color',(tRefresh>10 && (tRefresh%2==0)?'red':'black'));
+		}, 1000);
+
 		function setIntervalI(fn, t){
 			fn();
 			return setInterval(fn, t);
@@ -26,6 +31,7 @@
 		});
 
 		function updateDisplay(data){
+			tRefresh=0;
 			$('#currentSetTemp').html(data.setTemp);
 			$("#power").html(data.power);
 			$("#temperature").html(data.temperature);
@@ -65,6 +71,7 @@ Current Temp: <span id="temperature"></span><br>
 Power Level: <span id="power"></span><br>
 Running: <span id="running"></span><br>
 Time @ Temp: <span id="upTime"></span><br>
+<span style="font-size: .75em" id="tRefresh"></span>
 
 <br>
 <a href="/wifi.htm">WiFi Settings</a>
