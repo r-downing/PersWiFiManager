@@ -74,14 +74,14 @@ function updateInfo(){
 							if(pw==null) return;
 							formData.append("password",pw);
 						}
-						if(confirm("Connect to "+network.ssid+"?")) sendSettings(formData);
+						if(confirm("Connect to "+network.ssid+"?")) connectToWifi(formData);
 					}
 				}(data.networks[i], i);
 				wifiList.appendChild(_li);
 			}
 		}
 	};
-	xhttp.open("GET", "/wifi?list=", true);
+	xhttp.open("GET", "/wifi/list.json", true);
 	xhttp.send();
 }
 
@@ -93,7 +93,7 @@ function manualWifi(){
 	var pw=prompt("Enter password (blank for open wifi)");
 	if(pw==null) return;
 	if(pw.length) formData.append("password",pw);
-	sendSettings(formData);	
+	connectToWifi(formData);	
 }
 
 function WPS(){
@@ -104,22 +104,22 @@ function WPS(){
 				document.body.innerHTML="attempting WPS...";
 			}
 		};
-		xhttp.open("GET","/wifi?wps=")
+		xhttp.open("GET","/wifi/wps")
 		xhttp.send();
 	}
 }
 
 function rescan(){
 	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET","/wifi?rescan=")
+	xhttp.open("GET","/wifi/rescan")
 	xhttp.send();
 	document.getElementById("wifiList").innerHTML="Scanning...";
 	setTimeout(updateInfo, 2000);
 }
 
-function sendSettings(fd){
+function connectToWifi(fd){
 	var xhttp = new XMLHttpRequest();
-	xhttp.open("PUT", "/wifi");
+	xhttp.open("PUT", "/wifi/connect");
 	xhttp.send(fd);
 }
 

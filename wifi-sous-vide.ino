@@ -104,56 +104,53 @@ void setup() {
   //run a scan for wifi networks on setup
   scannedNetworks = WiFi.scanNetworks();
 
-  //handles wifi commands and data
-  server.on("/wifi", []() {
-    if (server.hasArg("list")) { //sends scanned list of wifi networks in JSON format
-      server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-      server.send(200, "application/json", "");
-      String cssid = WiFi.SSID();
-      cssid.replace("\"", "\\\"");
-      server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
-      for (int i = 0; i < scannedNetworks; i++) {
-        String ssid = WiFi.SSID(i);
-        ssid.replace("\"", "\\\"");
-        server.sendContent("{\"ssid\":\"" + ssid + "\","
-                           + "\"signal\":" + (WiFi.RSSI(i) + 100) + ","
-                           + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true")
-                           + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}")
-                          );
-      }//for
-      server.client().stop();
-      
-    } else if (server.hasArg("wps")) { //starts WPS setup mode, then reboots
-      server.send(200, "text/html", "WPS");
-      WiFi.mode(WIFI_STA);
-      WiFi.beginWPSConfig();
-      delay(100);
-      ESP.restart();
-      
-    } else if (server.hasArg("rescan")) { //re-scans wifi networks
-      scannedNetworks = WiFi.scanNetworks();
-      server.send(200, "text/html", "rescan");
-      
-    } else if (server.hasArg("ssid") || server.hasArg("ssidn")) { //connects to specified wifi network, then reboots
+  server.on("/wifi/list.json", [](){
+    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server.send(200, "application/json", "");
+    String cssid = WiFi.SSID();
+    cssid.replace("\"", "\\\"");
+    server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
+    for (int i = 0; i < scannedNetworks; i++) {
+      String ssid = WiFi.SSID(i);
+      ssid.replace("\"", "\\\"");
+      server.sendContent("{\"ssid\":\"" + ssid + "\","
+                         + "\"signal\":" + (WiFi.RSSI(i) + 100) + ","
+                         + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true")
+                         + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}")
+                        );
+    }//for
+    server.client().stop();
+  }); //server.on /wifi/list.json
+
+  server.on("/wifi/wps", [](){
+    server.send(200, "text/html", "WPS");
+    WiFi.mode(WIFI_STA);
+    WiFi.beginWPSConfig();
+    delay(100);
+    ESP.restart();
+  }); //server.on /wifi/wps
+
+  server.on("/wifi/rescan", [](){
+    scannedNetworks = WiFi.scanNetworks();
+    server.send(200, "text/html", "rescan");
+  }); //server.on /wifi/rescan
+
+  server.on("/wifi/connect", [](){
+    if (server.hasArg("ssid") || server.hasArg("ssidn")) { //connects to specified wifi network, then reboots
       WiFi.mode(WIFI_STA);
       String ssid = server.hasArg("ssid") ? server.arg("ssid") : WiFi.SSID(server.arg("ssidn").toInt());
       server.hasArg("password") ? WiFi.begin(ssid.c_str(), server.arg("password").c_str()) : WiFi.begin(ssid.c_str());
       delay(100);
       ESP.restart();
-    }//endif
-  });//server.on wifi
+    }//if
+  }); //server.on /wifi/connect
 
   //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
     if (server.hasArg("setTemp")) {
       setTemp = server.arg("setTemp").toFloat();
-      //myPID.reset();
-    }
+    }//if
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp + ",\"power\":" + myPID.getPulseValue() + "}");
-    //String("{'temperature':") + temperature + "}");
-    Serial.println(server.uri());
-    for (int i = 0; i < server.args(); i++)
-      Serial.println(server.argName(i) + ":::" + server.arg(i));
   }); //server.on io
 
   //SSDP makes device visible on windows network
