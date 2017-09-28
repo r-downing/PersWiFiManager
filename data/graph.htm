@@ -31,6 +31,13 @@
 				$('#canvasContainer').click(function () {
 					$('#controls').toggle();
 				});
+
+				$('#clearGraph').click(function () {
+					config.data.datasets[0].data=[];
+					config.data.datasets[1].data=[];
+					config.data.labels=[];
+					window.myLine.update();
+				});
 			});
 
 		});
@@ -41,9 +48,9 @@
 			config.data.datasets[1].data.push(data.temperature);
 			var d = new Date();
 			config.data.labels.push(d.toLocaleTimeString());
+			window.myLine.update();
 			$("#power").html(data.power);
 			$("#temperature").html(data.temperature);
-			window.myLine.update();
 			tRefresh = 0;
 			$("#power").html(data.power);
 			$("#running").html(data.running ? "On" : "Off");
@@ -53,14 +60,15 @@
 		}
 	</script>
 
-  <link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
 
 	<div id="controls">
 		<div id="loadbox"></div>
-		<br><span class="smalltext">click graph to toggle controls</span>
+		<a class="dbutton" id="clearGraph">Clear Graph Data</a>
+		<br><span class="smalltext">click outside this box to toggle controls</span>
 	</div>
 
 	<div id="canvasContainer">

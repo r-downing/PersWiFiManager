@@ -19,18 +19,18 @@
 }
 
 .smalltext {
-	font-size: .75em;
+	font-size: 75%;
 	font-weight: lighter;
 }
 
-@media only screen and (max-width: 768px) {
-	body {
-		font-size: 20px;
-	}
+.dbutton{
+	background-color:#3388ff;border-radius: 
+	0.25em; padding:.25em; margin:.1em; color:white; text-decoration:none;
+	border:none;
+	display: inline-block
 }
 
-@media only screen and (max-width: 320px) {
-	body {
-		font-size: 10px;
-	}
-}
+body{font-size:18px; line-height: 1.5}
+
+
+
