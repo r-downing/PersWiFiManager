@@ -5,80 +5,64 @@
 	<title>Sous Vide Control</title>
 	<script src="jquery-3.2.1.min.js"></script>
 	<script>
-
 		var tRefresh = 0;
-		setInterval(function(){
-			$('#tRefresh').html("Last updated "+(tRefresh++)+" seconds ago").css('color',(tRefresh>10 && (tRefresh%2==0)?'red':'black'));
-		}, 1000);
 
-		function setIntervalI(fn, t){
-			fn();
-			return setInterval(fn, t);
-		}
+		$(document).ready(function () {
+			setInterval(function () {
+				$('#tRefresh').html("Last updated " + (tRefresh++) + " seconds ago").css('color', (tRefresh > 10 && (tRefresh % 2 == 0) ? 'red' : 'black'));
+			}, 1000);
 
-		$( document ).ready(function() {
-
-			$('#setTempForm').submit(function(e){
+			$('#setTempForm').submit(function (e) {
 				e.preventDefault();
 				$('#currentSetTemp').html("...");
-				$.post("/io",$(this).serialize()).done(updateDisplay);
+				$.post("/io", $(this).serialize()).done(updateDisplay);
 			});
 
-			window.setIntervalI(function(){
-				$.get("/io",updateDisplay);
-			},5000);
+			$.get("/io", updateDisplay);
+			window.setInterval(function () {
+				$.get("/io", updateDisplay);
+			}, 5000);
 
 		});
 
-		function updateDisplay(data){
-			tRefresh=0;
+		function updateDisplay(data) {
+			tRefresh = 0;
 			$('#currentSetTemp').html(data.setTemp);
 			$("#power").html(data.power);
 			$("#temperature").html(data.temperature);
-			$("#running").html(data.running?"On":"Off");
+			$("#running").html(data.running ? "On" : "Off");
 			var date = new Date(null);
-			date.setSeconds(data.upTime/1000); // specify value for SECONDS here
-			var result = date.toISOString().substr(11, 8);
-			$("#upTime").html(result);
+			date.setSeconds(data.upTime / 1000); 
+			$("#upTime").html(date.toISOString().substr(11, 8));
 		}
-
 	</script>
-	<style>
 
-		body {width:100%; height:100%; margin:0;}
-		@media only screen and (max-width: 768px) {
-			body {
-				font-size: 20px;
-			}
-		}
+	<link rel="stylesheet" type="text/css" href="style.css">
 
-		@media only screen and (max-width: 320px) {
-			body {
-				font-size: 10px;
-			}
-		}
-	</style>
 </head>
 
 <body>
-Current Set Point: <span id="currentSetTemp"></span>
-<form id="setTempForm">
-	<input type="number" name="setTemp" step=".1" min="0"/>
-	<input type="submit" value="Set"/>
-</form>
 
-Current Temp: <span id="temperature"></span><br>
-Power Level: <span id="power"></span><br>
-Running: <span id="running"></span><br>
-Time @ Temp: <span id="upTime"></span><br>
-<span style="font-size: .75em" id="tRefresh"></span>
-
-<br>
-<br>
-<a href="/graph.htm">Temperature Graph</a>
-<br>
-<a href="/wifi.htm">WiFi Settings</a>
-
+<div id="main">
+		Current Set Point: <span id="currentSetTemp"></span>
+		<form id="setTempForm">
+			<input type="number" name="setTemp" step=".1" min="0" max="400"/>
+			<input type="submit" value="Set" />
+		</form>
+		Current Temp: <span id="temperature"></span>
+		<br> Power Level: <span id="power"></span>
+		<br> Running: <span id="running"></span>
+		<br> Time @ Temp: <span id="upTime"></span>
+		<br><span class="smalltext" id="tRefresh"></span>
+		<br>
+		<br>
+		<a href="/"><button>Home</button></a>
+		<br>
+		<a href="/graph.htm"><button>Graph</button></a>
+		<br>
+		<a href="/wifi.htm"><button>WiFi Settings</button></a>
+		<br>
+</div>
 
 
 </body>

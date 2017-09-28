@@ -1,0 +1,36 @@
+#canvasContainer {
+	width: inherit;
+	height: inherit;
+}
+
+#canvas {
+	width: inherit;
+	height: inherit;
+}
+
+#controls {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-radius: 0.5em;
+	margin: 0.5em;
+	padding: 0.5em;
+	background-color: lightgray;
+}
+
+.smalltext {
+	font-size: .75em;
+	font-weight: lighter;
+}
+
+@media only screen and (max-width: 768px) {
+	body {
+		font-size: 20px;
+	}
+}
+
+@media only screen and (max-width: 320px) {
+	body {
+		font-size: 10px;
+	}
+}
