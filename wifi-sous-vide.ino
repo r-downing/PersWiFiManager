@@ -58,6 +58,7 @@ bool handleFileRead(String path) {
   String pathGz = path + ".gz";
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
     File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
+    server.sendHeader("Cache-Control"," max-age=3600");
     size_t sent = server.streamFile(file, contentType);
     file.close();
     return true;
