@@ -2,75 +2,72 @@
 <html>
 
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>		
 	<title>Sous Vide Recipes</title>
 	<script src="jquery-3.2.1.min.js"></script>
 	<script>
 		var recipes = [{
-		"food": "Steak (rare)",
-		"temp": 122,
-		"tmin": 60,
-		"tmax": 120
-	}, {
-		"food": "Steak (medium rare)",
-		"temp": 132,
-		"tmin": 60,
-		"tmax": 120
-	}, {
-		"food": "Steak (medium)",
-		"temp": 140,
-		"tmin": 60,
-		"tmax": 120
-	}, {
-		"food": "Chicken (light meat)",
-		"temp": 149,
-		"tmin": 60,
-		"tmax": 180
-	}, {
-		"food": "Chicken (dark meat)",
-		"temp": 167,
-		"tmin": 45,
-		"tmax": 300
-	}, {
-		"food": "Pork Chops",
-		"temp": 144,
-		"tmin": 60,
-		"tmax": 180
-	}, {
-		"food": "Fish",
-		"temp": 122,
-		"tmin": 40,
-		"tmax": 70
-	}, {
-		"food": "Eggs (poached)",
-		"temp": 147,
-		"tmin": 60,
-		"tmax": 90
-	}, {
-		"food": "Green vegetables (tender)",
-		"temp": 180,
-		"tmin": 10,
-		"tmax": 20
-	}];
+			"food": "Steak (rare)",
+			"temp": 122,
+			"tmin": 60,
+			"tmax": 120
+		}, {
+			"food": "Steak (medium rare)",
+			"temp": 132,
+			"tmin": 60,
+			"tmax": 120
+		}, {
+			"food": "Steak (medium)",
+			"temp": 140,
+			"tmin": 60,
+			"tmax": 120
+		}, {
+			"food": "Chicken (light meat)",
+			"temp": 149,
+			"tmin": 60,
+			"tmax": 180
+		}, {
+			"food": "Chicken (dark meat)",
+			"temp": 167,
+			"tmin": 45,
+			"tmax": 300
+		}, {
+			"food": "Pork Chops",
+			"temp": 144,
+			"tmin": 60,
+			"tmax": 180
+		}, {
+			"food": "Fish",
+			"temp": 122,
+			"tmin": 40,
+			"tmax": 70
+		}, {
+			"food": "Eggs (poached)",
+			"temp": 147,
+			"tmin": 60,
+			"tmax": 90
+		}, {
+			"food": "Green vegetables (tender)",
+			"temp": 180,
+			"tmin": 10,
+			"tmax": 20
+		}];
 
-	function mToH(m){
-		return Math.floor(m/60)+":"+(((m%60)<10)?"0":"")+(m%60);
-	}
-
+		function mToH(m) {
+			return Math.floor(m / 60) + ":" + (((m % 60) < 10) ? "0" : "") + (m % 60);
+		}
 
 		$(document).ready(function () {
-			$(recipes).each(function(i,r){
-				console.log(r);
-				$('#recipes').append($("<span></span>").html(r.food+" ["+r.temp+"\xB0]<br>Cook time: "+mToH(r.tmin)+"-"+mToH(r.tmax))
-						.addClass('rbutton').click(function(){
-							$.post("/io", {"setTemp":r.temp}).done(function(){
-								window.location.href = "/";
-							});
-
-						}))
-					.append("<br>");
+			$(recipes).each(function (i, r) {
+				$("<span></span>").html(r.food + " [" + r.temp + "\xB0]<br>Cook time: " + mToH(r.tmin) + "-" + mToH(r.tmax))
+					.addClass('rbutton')
+					.click(function () {
+						$.post("/io", { "setTemp": r.temp }).done(function () {
+							window.location.href = "/";
+						});
+					})
+					.appendTo($('#recipes'));
 			});
-			
-
 		});
 
 	</script>
@@ -81,7 +78,7 @@
 
 <body>
 
-<div id="main">
+	<div id="main">
 		<div id="recipes"></div><br>
 		<a href="/" class="dbutton">Home</a>
 		<br>
@@ -89,7 +86,7 @@
 		<br>
 		<a href="wifi.htm" class="dbutton">WiFi</a>
 		<br>
-</div>
+	</div>
 
 
 </body>

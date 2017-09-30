@@ -2,6 +2,7 @@
 <html>
 
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />		
 	<title>Sous Vide Control</title>
 	<script src="jquery-3.2.1.min.js"></script>
 	<script>
@@ -32,7 +33,7 @@
 			$("#temperature").html(data.temperature);
 			$("#running").html(data.running ? "On" : "Off");
 			var date = new Date(null);
-			date.setSeconds(data.upTime / 1000); 
+			date.setSeconds(data.upTime / 1000);
 			$("#upTime").html(date.toISOString().substr(11, 8));
 		}
 	</script>
@@ -43,10 +44,10 @@
 
 <body>
 
-<div id="main">
+	<div id="main">
 		Current Set Point: <span id="currentSetTemp"></span>
 		<form id="setTempForm">
-			<input type="number" name="setTemp" step=".1" min="0" max="400"/>
+			<input type="number" name="setTemp" step=".1" min="0" max="400" />
 			<input class="dbutton" type="submit" value="Set" />
 		</form>
 		Current Temp: <span id="temperature"></span>
@@ -64,7 +65,7 @@
 		<br>
 		<a href="wifi.htm" class="dbutton">WiFi Setup</a>
 		<br>
-</div>
+	</div>
 
 
 </body>

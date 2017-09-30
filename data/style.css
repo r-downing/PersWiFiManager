@@ -31,11 +31,15 @@
 }
 
 .rbutton{
-	background-color:#228822;border-radius: 
-	0.25em; padding:.25em; margin:.1em; color:white; text-decoration:none;
+	background-color:#AFE9AF;border-radius: 
+	0.25em; padding:.25em; margin:.25em; color:black; text-decoration:none;
 	border:none;
-	display:inline-block;
+	display:block;
 	width:15em;
+}
+.dbutton:hover, .rbutton:hover {
+	background-color:#ECA2F3;
+	cursor:pointer;
 }
 
 body{font-size:18px; line-height: 1.5; font-family:sans-serif}
