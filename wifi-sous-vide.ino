@@ -54,6 +54,7 @@ bool handleFileRead(String path) {
   else if (path.endsWith(".pdf")) contentType = "application/x-pdf";
   else if (path.endsWith(".zip")) contentType = "application/x-zip";
   else if (path.endsWith(".gz")) contentType = "application/x-gzip";
+  else if (path.endsWith(".json")) contentType = "application/json";
   else contentType = "text/plain";
   String pathGz = path + ".gz";
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
