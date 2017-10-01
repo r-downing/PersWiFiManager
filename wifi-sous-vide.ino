@@ -36,6 +36,7 @@ void updateTemperature() {
 ESP8266WebServer server(80);
 int scannedNetworks, scanssid;
 DNSServer dnsServer;
+unsigned long etag;
 
 //code from fsbrowser example, consolidated.
 bool handleFileRead(String path) {
@@ -59,8 +60,15 @@ bool handleFileRead(String path) {
   String pathGz = path + ".gz";
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
     File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
-    server.sendHeader("Cache-Control"," max-age=3600");
-    size_t sent = server.streamFile(file, contentType);
+    //server.sendHeader("Cache-Control"," max-age=600");
+    server.sendHeader("Cache-Control"," public,max-age=3600");
+    if(!etag) etag=micros();
+    server.sendHeader("ETag",String("\"")+etag+"\"");
+    if(server.hasHeader("If-None-Match") && server.header("If-None-Match").equals(String("\"")+etag+"\"")){
+      server.send(304,"text/plain","...");
+    } else {
+      size_t sent = server.streamFile(file, contentType);
+    }
     file.close();
     return true;
   }//if SPIFFS.exists
@@ -81,6 +89,9 @@ void networkSetup(){
     WiFi.softAP("Sous Vide WiFi");
   }
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
+
+      const char * headers[] ={"If-None-Match"};
+    server.collectHeaders(headers,1);
 
   //allows serving of files from SPIFFS
   SPIFFS.begin();
