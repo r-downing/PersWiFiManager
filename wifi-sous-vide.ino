@@ -57,9 +57,9 @@ bool handleFileRead(String path) {
   else if (path.endsWith(".json")) contentType = "application/json";
   else contentType = "text/plain";
   String pathGz = path + ".gz";
+  File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
+  if (server.uri().indexOf("dynamic") < 0) server.sendHeader("Cache-Control", " max-age=172800");
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
-    File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
-    server.sendHeader("Cache-Control"," max-age=3600");
     size_t sent = server.streamFile(file, contentType);
     file.close();
     return true;
@@ -67,7 +67,7 @@ bool handleFileRead(String path) {
   return false;
 }//bool handleFileRead
 
-void networkSetup(){
+void networkSetup() {
   IPAddress apIP(192, 168, 1, 1);
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
@@ -92,11 +92,15 @@ void networkSetup(){
   }); //server.onNotFound
 
   //run a scan for wifi networks on setup
-  scannedNetworks = WiFi.scanNetworks();
+ // scannedNetworks = WiFi.scanNetworks();
 
   server.on("/wifi/list.json", []() {
     server.setContentLength(CONTENT_LENGTH_UNKNOWN);
     server.send(200, "application/json", "");
+    Serial.println(millis());
+    scannedNetworks = WiFi.scanNetworks();
+    Serial.println(millis());
+
     String cssid = WiFi.SSID();
     cssid.replace("\"", "\\\"");
     server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
@@ -141,13 +145,15 @@ void networkSetup(){
       setTemp = server.arg("setTemp").toFloat();
     }//if
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
-                + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + ((setTemp)?"true":"false") 
-                + ",\"upTime\":" + ((timeAtTemp)?(millis()-timeAtTemp):0) + "}"
+                + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + ((setTemp) ? "true" : "false")
+                + ",\"upTime\":" + ((timeAtTemp) ? (millis() - timeAtTemp) : 0) + "}"
                );
   }); //server.on io
 
   //SSDP makes device visible on windows network
-  server.on("/description.xml", HTTP_GET, [&]() { SSDP.schema(server.client()); });
+  server.on("/description.xml", HTTP_GET, [&]() {
+    SSDP.schema(server.client());
+  });
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
@@ -179,8 +185,8 @@ void loop() {
   if (setTemp) {
     myPID.run();
     digitalWrite(RELAY_PIN, !relayControl);
-    if(myPID.atSetPoint(2)) {
-      if(!timeAtTemp) timeAtTemp = millis();
+    if (myPID.atSetPoint(2)) {
+      if (!timeAtTemp) timeAtTemp = millis();
     } else {
       timeAtTemp = 0;
     }
