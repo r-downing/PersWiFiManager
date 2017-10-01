@@ -43,14 +43,14 @@
 		});
 
 		function updateDisplay(data) {
-			$('#currentSetTemp').html(data.setTemp);
+			$('#currentSetTemp').html(data.setTemp+"\xB0 F");
 			config.data.datasets[0].data.push(data.setTemp);
 			config.data.datasets[1].data.push(data.temperature);
 			var d = new Date();
 			config.data.labels.push(d.toLocaleTimeString());
 			window.myLine.update();
 			$("#power").html(data.power);
-			$("#temperature").html(data.temperature);
+			$("#temperature").html(data.temperature+"\xB0 F");
 			tRefresh = 0;
 			$("#power").html(data.power);
 			$("#running").html(data.running ? "On" : "Off");
