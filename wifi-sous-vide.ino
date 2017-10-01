@@ -121,11 +121,6 @@ void networkSetup() {
     ESP.restart();
   }); //server.on /wifi/wps
 
-  server.on("/wifi/rescan", []() {
-    scannedNetworks = WiFi.scanNetworks();
-    server.send(200, "text/html", "rescan");
-  }); //server.on /wifi/rescan
-
   server.on("/wifi/connect", []() {
     if (server.hasArg("ssid") || server.hasArg("ssidn")) { //connects to specified wifi network, then reboots
       WiFi.mode(WIFI_STA);
