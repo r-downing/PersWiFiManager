@@ -97,10 +97,7 @@ void networkSetup() {
   server.on("/wifi/list.json", []() {
     server.setContentLength(CONTENT_LENGTH_UNKNOWN);
     server.send(200, "application/json", "");
-    Serial.println(millis());
     scannedNetworks = WiFi.scanNetworks();
-    Serial.println(millis());
-
     String cssid = WiFi.SSID();
     cssid.replace("\"", "\\\"");
     server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");

@@ -27,9 +27,9 @@
 
 		function updateDisplay(data) {
 			tRefresh = 0;
-			$('#currentSetTemp').html(data.setTemp);
+			$('#currentSetTemp').html(data.setTemp+"\xB0 F");
 			$("#power").html(data.power);
-			$("#temperature").html(data.temperature);
+			$("#temperature").html(data.temperature+"\xB0 F");
 			$("#running").html(data.running ? "On" : "Off");
 			var date = new Date(null);
 			date.setSeconds(data.upTime / 1000); 

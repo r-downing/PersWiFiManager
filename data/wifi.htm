@@ -5,48 +5,48 @@
 	<title>Sous Vide WiFi</title>
 	<script src="jquery-3.2.1.min.js"></script>
 	<script>
-		var w={};
+		var w = {};
 
-        updateWifiList = function(){
-            $('#wifilist').text("loading...");
-            $.get("/wifi/list.json",function(data){
-                $('#wifilist').empty();
-                $(data.networks).each(function(i,e){
-                    $("<span></span>").html(e.ssid)
-                        .append('<br>')
-                        .append(((e.encrypted)?"\uD83D\uDD12 ":"\u26a0 ")+"\uD83D\uDCF6="+e.signal)
-                        .addClass('rbutton')
-                        .click(function(){
-                            w.ssidn=i;
-                            if(e.encrypted) {
-                                w.password=prompt("Enter password for "+e.ssid);
-                                if(w.password==null) return;
-                            }  
-                            if(confirm("Connect to "+e.ssid+"?")) $.post('/wifi/connect',w);
+		updateWifiList = function () {
+			$('#wifilist').text("loading...");
+			$.get("/wifi/list.json", function (data) {
+				$('#wifilist').empty();
+				$(data.networks).each(function (i, e) {
+					$("<span></span>").html(e.ssid)
+						.append('<br>')
+						.append(((e.encrypted) ? "\uD83D\uDD12 " : "\u26a0 ") + "\uD83D\uDCF6=" + e.signal)
+						.addClass('rbutton')
+						.click(function () {
+							w.ssidn = i;
+							if (e.encrypted) {
+								w.password = prompt("Enter password for " + e.ssid);
+								if (w.password == null) return;
+							}
+							if (confirm("Connect to " + e.ssid + "?")) $.post('/wifi/connect', w);
 
-                        })
-                        .appendTo('#wifilist');
-                });
-            });
-        };
+						})
+						.appendTo('#wifilist');
+				});
+			});
+		};
 
-        $(document).ready(function(){
-            updateWifiList();
+		$(document).ready(function () {
+			updateWifiList();
 
-            $('#manual').click(function(){
-                w={};
-                w.ssid=prompt("Enter network name");
-                if(w.ssid==null) return;
-                var p=prompt("Enter password (blank for open wifi");
-                if(p==null) return;
-                if(p.length) w.password=p;
-                if(confirm("Connect to "+w.ssid+"?")) $.post('/wifi/connect',w);
-            });
+			$('#manual').click(function () {
+				w = {};
+				w.ssid = prompt("Enter network name");
+				if (w.ssid == null) return;
+				var p = prompt("Enter password (blank for open wifi");
+				if (p == null) return;
+				if (p.length) w.password = p;
+				if (confirm("Connect to " + w.ssid + "?")) $.post('/wifi/connect', w);
+			});
 
-            $('#wps').click(function(){
-                if(confirm("Start WPS setup?")) $.post('/wifi/wps');
-            });
-        });
+			$('#wps').click(function () {
+				if (confirm("Start WPS setup?")) $.post('/wifi/wps');
+			});
+		});
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="style.css">
@@ -55,18 +55,18 @@
 
 <body>
 
-<div id="main">
-        <div id="wifilist"></div><br>
-        <span id="manual" class='rbutton'>Manual</span>
-        <span id="wps" class='rbutton'>WPS Setup</span>
-        <br>
+	<div id="main">
+		<div id="wifilist"></div><br>
+		<span id="manual" class='rbutton'>Manual</span>
+		<span id="wps" class='rbutton'>WPS Setup</span>
+		<br>
 		<a href="/" class="dbutton">Home</a>
 		<br>
 		<a href="graph.htm" class="dbutton">Graph</a>
 		<br>
 		<a href="wifi.htm" class="dbutton">WiFi</a>
 		<br>
-</div>
+	</div>
 
 
 </body>

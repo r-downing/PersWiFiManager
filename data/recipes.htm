@@ -59,7 +59,7 @@
 
 		$(document).ready(function () {
 			$(recipes).each(function (i, r) {
-				$("<span></span>").html(r.food + " [" + r.temp + "\xB0]<br>Cook time: " + mToH(r.tmin) + "-" + mToH(r.tmax))
+				$("<span></span>").html(r.food + " [" + r.temp + "\xB0 F]<br>Cook time: " + mToH(r.tmin) + "-" + mToH(r.tmax))
 					.addClass('rbutton')
 					.click(function () {
 						$.post("/io", { "setTemp": r.temp }).done(function () {
