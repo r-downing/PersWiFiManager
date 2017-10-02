@@ -85,7 +85,7 @@ void AutoPIDRelay::run() {
 }
 
 double AutoPIDRelay::getPulseValue(){
-  return _pulseValue;
+  return (_stopped?0:_pulseValue);
 }
 
 
