@@ -9,7 +9,7 @@
 
 		updateWifiList = function () {
 			$.get("/wifi/list.json", function (data) {
-				$('#wifistatus').html("WiFi Status: <br>"+(data.connected?("Connected to "+data.connected):"Not connected"));
+				$('#wifistatus').html((data.connected?("Connected to "+data.connected):"Not connected"));
 				$(data.networks).each(function (i, e) {
 					$("<span></span>").html(e.ssid)
 						.append('<br>')
@@ -56,13 +56,15 @@
 <body>
 
 	<div id="main">
-		<span id="wifistatus">Loading...</span><br>
-		<span class="smalltext">Changing WiFi settings will reboot the device.</span><br>
+		WiFi Status: <br>
+		<span id="wifistatus" class="smalltext">Loading...</span><br>
 		<br>
 		WiFi Networks:
 		<div id="wifilist"></div><br>
 		<span id="manual" class='rbutton'>Manual</span>
-		<span id="wps" class='rbutton'>WPS Setup</span>
+		<span id="wps" class='rbutton'>WPS Setup
+			<span class="smalltext">requires reboot</span>
+		</span>
 		<br>
 		<a href="/" class="dbutton">Home</a>
 		<br>

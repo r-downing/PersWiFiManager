@@ -68,13 +68,6 @@ bool handleFileRead(String path) {
 }//bool handleFileRead
 
 void attemptConnection(){
-  
-}
-
-void networkSetup(){
-  //attempt to connect to wifi
-  WiFi.mode(WIFI_STA);
-  WiFi.begin();
   unsigned long connectTime = millis();
   while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED) delay(10);
   //if timed out, switch to AP mode
@@ -82,9 +75,15 @@ void networkSetup(){
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
-  }
-  dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
+  }//if
+}//attemptConnection
 
+void networkSetup(){
+  //attempt to connect to wifi
+  WiFi.mode(WIFI_STA);
+  WiFi.begin();
+  attemptConnection();
+  dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
   //allows serving of files from SPIFFS
   SPIFFS.begin();
   server.onNotFound([]() {
@@ -127,7 +126,7 @@ void networkSetup(){
       String ssid = server.hasArg("ssid") ? server.arg("ssid") : WiFi.SSID(server.arg("ssidn").toInt());
       server.hasArg("password") ? WiFi.begin(ssid.c_str(), server.arg("password").c_str()) : WiFi.begin(ssid.c_str());
       delay(100);
-      ESP.restart();
+      attemptConnection();
     }//if
   }); //server.on /wifi/connect
 
