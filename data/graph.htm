@@ -23,6 +23,11 @@
 					$.post("/io", $(this).serialize()).done(updateDisplay);
 				});
 
+				$('#offbutton').click(function(){
+					$('#setTempForm')[0].reset();
+					$.post("/io",{setTemp:0}).done(updateDisplay);
+				});
+
 				$.get("/io", updateDisplay);
 				window.setInterval(function () {
 					$.get("/io", updateDisplay);
