@@ -28,6 +28,7 @@
 	0.25em; padding:.25em; margin:.1em; color:white; text-decoration:none;
 	border:none;
 	display: inline-block;
+	cursor:pointer;
 }
 
 .rbutton{
@@ -35,7 +36,8 @@
 	0.25em; padding:.25em; margin:.1em; color:white; text-decoration:none;
 	border:none;
 	display:block;
-	width:15em;
+	width:18em;
+	cursor:pointer;
 }
 
 body{font-size:18px; line-height: 1.5; font-family:sans-serif}
