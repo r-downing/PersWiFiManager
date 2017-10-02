@@ -25,7 +25,7 @@
 
 				$('#offbutton').click(function(){
 					$('#setTempForm')[0].reset();
-					$.post("/io",{setTemp:0}).done(updateDisplay);
+					$.post("/io",{powerOff:1}).done(updateDisplay);
 				});
 
 				$.get("/io", updateDisplay);

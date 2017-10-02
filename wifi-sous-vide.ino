@@ -35,6 +35,7 @@ void updateTemperature() {
 ESP8266WebServer server(80);
 int scannedNetworks, scanssid;
 DNSServer dnsServer;
+IPAddress apIP(192, 168, 1, 1);
 
 //code from fsbrowser example, consolidated.
 bool handleFileRead(String path) {
@@ -66,8 +67,11 @@ bool handleFileRead(String path) {
   return false;
 }//bool handleFileRead
 
+void attemptConnection(){
+  
+}
+
 void networkSetup(){
-  IPAddress apIP(192, 168, 1, 1);
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin();
@@ -130,10 +134,14 @@ void networkSetup(){
   //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
     if (server.hasArg("setTemp")) {
+      powerOn=true;
       setTemp = server.arg("setTemp").toFloat();
     }//if
+    if (server.hasArg("powerOff")){
+      powerOn=false;
+    }
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
-                + ",\"power\":" + (setTemp?myPID.getPulseValue():0) + ",\"running\":" + ((setTemp)?"true":"false") 
+                + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn?"true":"false") 
                 + ",\"upTime\":" + ((timeAtTemp)?(millis()-timeAtTemp):0) + "}"
                );
   }); //server.on io
@@ -168,7 +176,7 @@ void loop() {
   dnsServer.processNextRequest();
   server.handleClient();
   updateTemperature();
-  if (setTemp) {
+  if (powerOn) {
     myPID.run();
     digitalWrite(RELAY_PIN, !relayControl);
     if(myPID.atSetPoint(2)) {

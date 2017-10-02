@@ -78,14 +78,19 @@ void AutoPID::reset() {
   _previousError = 0;
 }
 
+bool AutoPID::isStopped(){
+  return _stopped;
+}
+
 void AutoPIDRelay::run() {
   AutoPID::run();
   while ((millis() - _lastPulseTime) > _pulseWidth) _lastPulseTime += _pulseWidth;
   *_relayState = ((millis() - _lastPulseTime) < (_pulseValue * _pulseWidth));
 }
 
+
 double AutoPIDRelay::getPulseValue(){
-  return (_stopped?0:_pulseValue);
+  return (isStopped()?0:_pulseValue);
 }
 
 

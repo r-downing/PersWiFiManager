@@ -26,6 +26,7 @@ class AutoPID {
     // Stops PID functionality, output sets to 
     void stop();
     void reset();
+    bool isStopped();
 
   private:
     double _Kp, _Ki, _Kd;
