@@ -70,8 +70,7 @@ bool handleFileRead(String path) {
 void attemptConnection(){
   unsigned long connectTime = millis();
   while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED) delay(10);
-  //if timed out, switch to AP mode
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {  //if timed out, switch to AP mode
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
@@ -138,7 +137,7 @@ void networkSetup(){
     }//if
     if (server.hasArg("powerOff")){
       powerOn=false;
-    }
+    }//if
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
                 + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn?"true":"false") 
                 + ",\"upTime\":" + ((timeAtTemp)?(millis()-timeAtTemp):0) + "}"
@@ -187,6 +186,6 @@ void loop() {
     timeAtTemp = 0;
     myPID.stop();
     digitalWrite(RELAY_PIN, HIGH);
-  }
+  }//endif
 }//void loop
 
