@@ -18,9 +18,9 @@
 				$.post("/io", $(this).serialize()).done(updateDisplay);
 			});
 
-			$('#offbutton').click(function(){
+			$('#offbutton').click(function () {
 				$('#setTempForm')[0].reset();
-				$.post("/io",{powerOff:1}).done(updateDisplay);
+				$.post("/io", { powerOff: 1 }).done(updateDisplay);
 			});
 
 			$.get("/io", updateDisplay);
@@ -32,12 +32,12 @@
 
 		function updateDisplay(data) {
 			tRefresh = 0;
-			$('#currentSetTemp').html(data.setTemp+"\xB0 F");
+			$('#currentSetTemp').html(data.setTemp + "\xB0 F");
 			$("#power").html(data.power);
-			$("#temperature").html(data.temperature+"\xB0 F");
+			$("#temperature").html(data.temperature + "\xB0 F");
 			$("#running").html(data.running ? "On" : "Off");
 			var date = new Date(null);
-			date.setSeconds(data.upTime / 1000); 
+			date.setSeconds(data.upTime / 1000);
 			$("#upTime").html(date.toISOString().substr(11, 8));
 		}
 	</script>
@@ -48,14 +48,14 @@
 
 <body>
 
-<div id="main">
+	<div id="main">
 		Current Set Point: <span id="currentSetTemp"></span>
 		<form id="setTempForm">
-			<input type="number" name="setTemp" step=".1" min="0" max="400"/>
-			<input class="dbutton" type="submit" value="Set" /> 
+			<input type="number" name="setTemp" step=".1" min="0" max="400" />
+			<input class="dbutton" type="submit" value="Set" />
 			<button type="button" id="offbutton" class="dbutton">Off</button>
 		</form>
-		
+
 		Current Temp: <span id="temperature"></span>
 		<br> Power Level: <span id="power"></span>
 		<br> Running: <span id="running"></span>
@@ -63,15 +63,16 @@
 		<br><span class="smalltext" id="tRefresh"></span>
 		<br>
 		<br>
-		<a href="/" class="dbutton">Home</a>
-		<br>
-		<a href="graph.htm" class="dbutton">Graph</a>
-		<br>
-		<a href="recipes.htm" class="dbutton">Recipes</a>
-		<br>
-		<a href="wifi.htm" class="dbutton">WiFi Setup</a>
-		<br>
-</div>
+		<div id="nav">
+			<a href="/" class="dbutton">Home</a>
+			<br>
+			<a href="graph.htm" class="dbutton">Graph</a>
+			<br>
+			<a href="recipes.htm" class="dbutton">Recipes</a>
+			<br>
+			<a href="wifi.htm" class="dbutton">WiFi Setup</a>
+		</div>
+	</div>
 
 
 </body>

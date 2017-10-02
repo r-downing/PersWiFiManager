@@ -56,8 +56,8 @@
 			return Math.floor(m / 60) + ":" + (((m % 60) < 10) ? "0" : "") + (m % 60);
 		}
 
-
 		$(document).ready(function () {
+			$('#loadnav').load('index.htm #nav');
 			$(recipes).each(function (i, r) {
 				$("<span></span>").html(r.food + " [" + r.temp + "\xB0 F]<br>Cook time: " + mToH(r.tmin) + "-" + mToH(r.tmax))
 					.addClass('rbutton')
@@ -72,22 +72,12 @@
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="style.css">
-
 </head>
-
 <body>
 
 	<div id="main">
 		<div id="recipes"></div><br>
-		<a href="/" class="dbutton">Home</a>
-		<br>
-		<a href="graph.htm" class="dbutton">Graph</a>
-		<br>
-		<a href="wifi.htm" class="dbutton">WiFi Setup</a>
-		<br>
+		<div id="loadnav"></div>
 	</div>
-
-
 </body>
-
 </html>

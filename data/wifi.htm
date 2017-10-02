@@ -31,6 +31,7 @@
 
 		$(document).ready(function () {
 			$.ajaxSetup({timeout:900000});
+			$('#loadnav').load('index.htm #nav');
 			updateWifiList();
 
 			$('#manual').click(function () {
@@ -66,12 +67,7 @@
 			<span class="smalltext">requires reboot</span>
 		</span>
 		<br>
-		<a href="/" class="dbutton">Home</a>
-		<br>
-		<a href="graph.htm" class="dbutton">Graph</a>
-		<br>
-		<a href="wifi.htm" class="dbutton">WiFi</a>
-		<br>
+		<div id="loadnav"></div>
 	</div>
 
 
