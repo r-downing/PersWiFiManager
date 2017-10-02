@@ -8,9 +8,7 @@
 		var w = {};
 
 		updateWifiList = function () {
-			$('#wifilist').text("loading...");
 			$.get("/wifi/list.json", function (data) {
-				$('#wifilist').empty();
 				$('#wifistatus').html("WiFi Status: <br>"+(data.connected?("Connected to "+data.connected):"Not connected"));
 				$(data.networks).each(function (i, e) {
 					$("<span></span>").html(e.ssid)
@@ -58,7 +56,7 @@
 <body>
 
 	<div id="main">
-		<span id="wifistatus" class="rbutton"></span>
+		<span id="wifistatus">Loading...</span><br>
 		<div id="wifilist"></div><br>
 		<span id="manual" class='rbutton'>Manual</span>
 		<span id="wps" class='rbutton'>WPS Setup</span>
