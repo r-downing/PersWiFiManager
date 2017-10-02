@@ -18,6 +18,11 @@
 				$.post("/io", $(this).serialize()).done(updateDisplay);
 			});
 
+			$('#offbutton').click(function(){
+				$('#setTempForm')[0].reset();
+				$.post("/io",{setTemp:0}).done(updateDisplay);
+			});
+
 			$.get("/io", updateDisplay);
 			window.setInterval(function () {
 				$.get("/io", updateDisplay);
@@ -47,8 +52,10 @@
 		Current Set Point: <span id="currentSetTemp"></span>
 		<form id="setTempForm">
 			<input type="number" name="setTemp" step=".1" min="0" max="400"/>
-			<input class="dbutton" type="submit" value="Set" />
+			<input class="dbutton" type="submit" value="Set" /> 
+			<button type="button" id="offbutton" class="dbutton">Off</button>
 		</form>
+		
 		Current Temp: <span id="temperature"></span>
 		<br> Power Level: <span id="power"></span>
 		<br> Running: <span id="running"></span>
