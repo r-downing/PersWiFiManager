@@ -67,7 +67,10 @@ bool handleFileRead(String path) {
   return false;
 }//bool handleFileRead
 
-void attemptConnection(){
+void networkSetup(){
+  //attempt to connect to wifi
+  WiFi.mode(WIFI_STA);
+  WiFi.begin();
   unsigned long connectTime = millis();
   while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED) delay(10);
   if (WiFi.status() != WL_CONNECTED) {  //if timed out, switch to AP mode
@@ -75,13 +78,6 @@ void attemptConnection(){
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
   }//if
-}//attemptConnection
-
-void networkSetup(){
-  //attempt to connect to wifi
-  WiFi.mode(WIFI_STA);
-  WiFi.begin();
-  attemptConnection();
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
   //allows serving of files from SPIFFS
   SPIFFS.begin();
@@ -125,7 +121,7 @@ void networkSetup(){
       String ssid = server.hasArg("ssid") ? server.arg("ssid") : WiFi.SSID(server.arg("ssidn").toInt());
       server.hasArg("password") ? WiFi.begin(ssid.c_str(), server.arg("password").c_str()) : WiFi.begin(ssid.c_str());
       delay(100);
-      attemptConnection();
+      ESP.restart();
     }//if
   }); //server.on /wifi/connect
 
@@ -143,7 +139,6 @@ void networkSetup(){
                 + ",\"upTime\":" + ((timeAtTemp)?(millis()-timeAtTemp):0) + "}"
                );
   }); //server.on io
-
   //SSDP makes device visible on windows network
   server.on("/description.xml", HTTP_GET, [&]() { SSDP.schema(server.client()); });
   SSDP.setSchemaURL("description.xml");
