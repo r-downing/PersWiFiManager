@@ -7,7 +7,7 @@
 	<script src="charts.min.js"></script>
 	<script>
 		var tRefresh = 0;
-		var rx = true;
+		var rx = false;
 
 		$(document).ready(function () {
 
@@ -31,7 +31,7 @@
 
 				$.get("/io", updateDisplay);
 				window.setInterval(function () {
-					if(!rx) $.get("/io", updateDisplay);
+					if(!rx) $.get("/io", updateDisplay).fail(function(){rx = false;});
 					rx = true;
 				}, 5000);
 
