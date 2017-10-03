@@ -6,6 +6,7 @@
 	<script src="jquery-3.2.1.min.js"></script>
 	<script>
 		var tRefresh = 0;
+		var rx = true;
 
 		$(document).ready(function () {
 			setInterval(function () {
@@ -25,12 +26,14 @@
 
 			$.get("/io", updateDisplay);
 			window.setInterval(function () {
-				$.get("/io", updateDisplay);
+				if(!rx) $.get("/io", updateDisplay);
+				rx = true;
 			}, 5000);
 
 		});
 
 		function updateDisplay(data) {
+			rx = false;
 			tRefresh = 0;
 			$('#currentSetTemp').html(data.setTemp + "\xB0 F");
 			$("#power").html(data.power);

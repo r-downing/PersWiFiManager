@@ -7,6 +7,7 @@
 	<script src="charts.min.js"></script>
 	<script>
 		var tRefresh = 0;
+		var rx = true;
 
 		$(document).ready(function () {
 
@@ -30,7 +31,8 @@
 
 				$.get("/io", updateDisplay);
 				window.setInterval(function () {
-					$.get("/io", updateDisplay);
+					if(!rx) $.get("/io", updateDisplay);
+					rx = true;
 				}, 5000);
 
 				$('#canvasContainer').click(function () {
@@ -48,6 +50,7 @@
 		});
 
 		function updateDisplay(data) {
+			rx = false;
 			$('#currentSetTemp').html(data.setTemp+"\xB0 F");
 			config.data.datasets[0].data.push(data.setTemp);
 			config.data.datasets[1].data.push(data.temperature);
