@@ -23,8 +23,11 @@ DallasTemperature temperatureSensors(&oneWire);
 #define TEMP_READ_DELAY 800
 double temperature, setTemp;
 unsigned long timeAtTemp;
-bool relayControl,powerOn;
+bool relayControl, powerOn;
 AutoPIDRelay myPID(&temperature, &setTemp, &relayControl, 5000, .12, .0003, 0);
+
+const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"3; url=http://192.168.1.1/\" /></head><body><p>redirecting...</p></body>";
+
 
 unsigned long lastTempUpdate;
 void updateTemperature() {
@@ -62,7 +65,7 @@ bool handleFileRead(String path) {
   else contentType = "text/plain";
   String pathGz = path + ".gz";
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
-    Serial.println("sending file "+path);
+    Serial.println("sending file " + path);
     File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
     if (server.uri().indexOf("dynamic") < 0) server.sendHeader("Cache-Control", " max-age=172800");
     size_t sent = server.streamFile(file, contentType);
@@ -72,7 +75,7 @@ bool handleFileRead(String path) {
   return false;
 }//bool handleFileRead
 
-void networkSetup(){
+void networkSetup() {
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin();
@@ -85,6 +88,7 @@ void networkSetup(){
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
   }//if
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
   //allows serving of files from SPIFFS
   SPIFFS.begin();
@@ -92,18 +96,27 @@ void networkSetup(){
     Serial.println("onNotFound");/////////////////////////////////////////////////
     if (!handleFileRead(server.uri()))
       //if (WiFi.status() != WL_CONNECTED) {
-        //server.sendHeader("Location", String("/"), true);
-        //server.send ( 302, "text/plain", "");//handleFileRead("/");
+      //server.sendHeader("Location", String("/"), true);
+      //server.send ( 302, "text/plain", "");//handleFileRead("/");
       //} else {
-        Serial.println("send 200 filenotfound");//////////////////////////////
-        server.send(200, "text/plain", "<a href='/'>home</a>");
-      //}
+      Serial.println("send 200 filenotfound");//////////////////////////////
+    server.send(302, "text/html", metaRefreshStr);
+    //server.send(200, "text/plain", "<a href='/'>home</a>");
+    //}
   }); //server.onNotFound
 
-  server.on("/wifi/list.json", []() {
+  //run a scan for wifi networks on setup
+  scannedNetworks = WiFi.scanNetworks();
+
+  server.on("/wifi/rescan", []() {
+    scannedNetworks = WiFi.scanNetworks();
+    server.sendHeader("Location", "/wifi/list.json", true);
+    server.send(302, "text/plain", "");
+  });
+
+  server.on("/wifi/list.json", [](){
     server.setContentLength(CONTENT_LENGTH_UNKNOWN);
     server.send(200, "application/json", "");
-    scannedNetworks = WiFi.scanNetworks();
     String cssid = WiFi.SSID();
     cssid.replace("\"", "\\\"");
     server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
@@ -141,23 +154,24 @@ void networkSetup(){
   server.on("/io", []() {
     Serial.println("server.on /io");/////////////////////////////////////////////
     if (server.hasArg("setTemp")) {
-      powerOn=true;
+      powerOn = true;
       setTemp = server.arg("setTemp").toFloat();
     }//if
-    if (server.hasArg("powerOff")){
-      powerOn=false;
+    if (server.hasArg("powerOff")) {
+      powerOn = false;
     }//if
     Serial.println("Server.send json io");///////////////////////////////////////
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
-                + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn?"true":"false") 
-                + ",\"upTime\":" + ((timeAtTemp)?(millis()-timeAtTemp):0) + "}"
+                + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn ? "true" : "false")
+                + ",\"upTime\":" + ((timeAtTemp) ? (millis() - timeAtTemp) : 0) + "}"
                );
   }); //server.on io
   //SSDP makes device visible on windows network
   server.on("/description.xml", HTTP_GET, [&]() {
     Serial.println("SSDP schema");//////////////////////////////////////////////
-    SSDP.schema(server.client()); }
-  );
+    SSDP.schema(server.client());
+  }
+           );
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
@@ -189,8 +203,8 @@ void loop() {
   if (powerOn) {
     myPID.run();
     digitalWrite(RELAY_PIN, !relayControl);
-    if(myPID.atSetPoint(2)) {
-      if(!timeAtTemp) timeAtTemp = millis();
+    if (myPID.atSetPoint(2)) {
+      if (!timeAtTemp) timeAtTemp = millis();
     } else {
       timeAtTemp = 0;
     }
@@ -200,7 +214,5 @@ void loop() {
     digitalWrite(RELAY_PIN, HIGH);
   }//endif
 
-  uint32_t free = system_get_free_heap_size();
-  //Serial.println(free);
 }//void loop
 
