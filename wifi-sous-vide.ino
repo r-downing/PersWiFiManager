@@ -7,6 +7,9 @@
 #include "AutoPID.h"
 //#include "AutoPID.cpp"
 #define WIFI_CONNECT_TIMEOUT 30
+extern "C" {
+#include "user_interface.h"
+}
 
 #define RELAY_PIN D7
 #define PULSEWIDTH 5000
@@ -39,6 +42,7 @@ IPAddress apIP(192, 168, 1, 1);
 
 //code from fsbrowser example, consolidated.
 bool handleFileRead(String path) {
+  Serial.println("handlefileread" + path);
   if (path.endsWith("/")) path += "index.htm";
   String contentType;
   if (server.hasArg("download")) contentType = "application/octet-stream";
@@ -58,6 +62,7 @@ bool handleFileRead(String path) {
   else contentType = "text/plain";
   String pathGz = path + ".gz";
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
+    Serial.println("sending file "+path);
     File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
     if (server.uri().indexOf("dynamic") < 0) server.sendHeader("Cache-Control", " max-age=172800");
     size_t sent = server.streamFile(file, contentType);
@@ -71,9 +76,11 @@ void networkSetup(){
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin();
+  Serial.println("WiFi.begin");/////////////////////////////////////////////////
   unsigned long connectTime = millis();
   while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED) delay(10);
   if (WiFi.status() != WL_CONNECTED) {  //if timed out, switch to AP mode
+    Serial.println("WIFI_AP");////////////////////////////////////////////////////
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
@@ -82,10 +89,15 @@ void networkSetup(){
   //allows serving of files from SPIFFS
   SPIFFS.begin();
   server.onNotFound([]() {
+    Serial.println("onNotFound");/////////////////////////////////////////////////
     if (!handleFileRead(server.uri()))
-      if (WiFi.status() != WL_CONNECTED) {
-        handleFileRead("/");
-      } else server.send(200, "text/plain", "FileNotFound");
+      //if (WiFi.status() != WL_CONNECTED) {
+        //server.sendHeader("Location", String("/"), true);
+        //server.send ( 302, "text/plain", "");//handleFileRead("/");
+      //} else {
+        Serial.println("send 200 filenotfound");//////////////////////////////
+        server.send(200, "text/plain", "<a href='/'>home</a>");
+      //}
   }); //server.onNotFound
 
   server.on("/wifi/list.json", []() {
@@ -127,6 +139,7 @@ void networkSetup(){
 
   //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
+    Serial.println("server.on /io");/////////////////////////////////////////////
     if (server.hasArg("setTemp")) {
       powerOn=true;
       setTemp = server.arg("setTemp").toFloat();
@@ -134,13 +147,17 @@ void networkSetup(){
     if (server.hasArg("powerOff")){
       powerOn=false;
     }//if
+    Serial.println("Server.send json io");///////////////////////////////////////
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
                 + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn?"true":"false") 
                 + ",\"upTime\":" + ((timeAtTemp)?(millis()-timeAtTemp):0) + "}"
                );
   }); //server.on io
   //SSDP makes device visible on windows network
-  server.on("/description.xml", HTTP_GET, [&]() { SSDP.schema(server.client()); });
+  server.on("/description.xml", HTTP_GET, [&]() {
+    Serial.println("SSDP schema");//////////////////////////////////////////////
+    SSDP.schema(server.client()); }
+  );
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
@@ -182,5 +199,8 @@ void loop() {
     myPID.stop();
     digitalWrite(RELAY_PIN, HIGH);
   }//endif
+
+  uint32_t free = system_get_free_heap_size();
+  //Serial.println(free);
 }//void loop
 
