@@ -26,7 +26,7 @@ unsigned long timeAtTemp;
 bool relayControl, powerOn;
 AutoPIDRelay myPID(&temperature, &setTemp, &relayControl, 5000, .12, .0003, 0);
 
-const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"3; url=http://192.168.1.1/\" /></head><body><p>redirecting...</p></body>";
+const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"3; url=/\" /></head><body><p>redirecting...</p></body>";
 
 
 unsigned long lastTempUpdate;
