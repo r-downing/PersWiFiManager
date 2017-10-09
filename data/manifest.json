@@ -1,0 +1,6 @@
+{
+  "short_name": "Sous Vide",
+  "name": "Sous Vide Control",
+  "start_url": "/index.htm",
+  "display": "standalone",
+}
