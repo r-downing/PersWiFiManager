@@ -3,6 +3,7 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
+#include <ESP8266mDNS.h>
 #include <FS.h>
 #include "AutoPID.h"
 //#include "AutoPID.cpp"
@@ -178,6 +179,9 @@ void networkSetup() {
   SSDP.setURL("/");
   SSDP.begin();
   SSDP.setDeviceType("upnp:rootdevice");
+
+  MDNS.begin("sousvide");
+  MDNS.addService("http", "tcp", 80);
 }//void networkSetup
 
 void setup() {
