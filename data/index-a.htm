@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html ng-app="sousVide">
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />		
+	<title>Sous Vide Control</title>
+	<link rel="manifest" href="/manifest.json">	
+	<script src="jquery-3.2.1.min.js"></script>
+	<script src="angular.min.js"></script>
+	<script src="core.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body ng-controller="mainController">
+
+	<div id="main">
+		Current Set Point: {{data.setTemp}} &deg F
+		<form ng-submit="submit(formData)">
+			<input type="number" ng-model="formData.setTemp" step=".1" min="0" max="400" />
+			<input class="dbutton" type="submit" value="Set" />
+			<button type="button" class="dbutton" ng-click="submit({powerOff:''})">Off</button>
+		</form>
+
+		Current Temp: {{data.temperature}} &deg F
+		<br> Power Level: {{data.power*100}}%
+		<br> Running: {{data.running ? "On" : "Off"}}
+		<br> Time @ Temp: {{upTimeDisp}}
+		<br><span class="smalltext" style="color:{{(tRefresh>10&&tRefresh%2)?'red':'black'}}">Last updated {{tRefresh}} seconds ago. <span ng-if="tx">Updating...</span></span>
+		<br>
+		<br>
+		<div id="nav">
+			<a href="/" class="dbutton">Home</a>
+			<br>
+			<a href="graph.htm" class="dbutton">Graph</a>
+			<br>
+			<a href="recipes.htm" class="dbutton">Recipes</a>
+			<br>
+			<a href="wifi.htm" class="dbutton">WiFi Setup</a>
+		</div>
+	</div>
+
+</body>
+</html>
