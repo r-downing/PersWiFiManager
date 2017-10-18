@@ -27,8 +27,9 @@ unsigned long timeAtTemp;
 bool relayControl, powerOn;
 AutoPIDRelay myPID(&temperature, &setTemp, &relayControl, 5000, .12, .0003, 0);
 
-const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"3; url=/\" /></head><body><p>redirecting...</p></body>";
-
+const char *metaRefreshStr = R"====(
+<head><meta http-equiv="refresh" content="3; url=/" /></head><body><a href="/">redirecting...</a></body>
+)====";
 
 unsigned long lastTempUpdate;
 void updateTemperature() {
@@ -49,9 +50,7 @@ bool handleFileRead(String path) {
   Serial.println("handlefileread" + path);
   if (path.endsWith("/")) path += "index.htm";
   String contentType;
-  if (server.hasArg("download")) contentType = "application/octet-stream";
-  else if (path.endsWith(".htm")) contentType = "text/html";
-  else if (path.endsWith(".html")) contentType = "text/html";
+  if (path.endsWith(".htm") || path.endsWith(".html")) contentType = "text/html";
   else if (path.endsWith(".css")) contentType = "text/css";
   else if (path.endsWith(".js")) contentType = "application/javascript";
   else if (path.endsWith(".png")) contentType = "image/png";
@@ -68,7 +67,8 @@ bool handleFileRead(String path) {
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
     Serial.println("sending file " + path);
     File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
-    if (server.uri().indexOf("dynamic") < 0) server.sendHeader("Cache-Control", " max-age=172800");
+    if(server.hasArg("download")) server.sendHeader("Content-Disposition", " attachment;");
+    if (server.uri().indexOf("nocache") < 0) server.sendHeader("Cache-Control", " max-age=172800");
     size_t sent = server.streamFile(file, contentType);
     file.close();
     return true;
@@ -167,6 +167,7 @@ void networkSetup() {
                 + ",\"upTime\":" + ((timeAtTemp) ? (millis() - timeAtTemp) : 0) + "}"
                );
   }); //server.on io
+  
   //SSDP makes device visible on windows network
   server.on("/description.xml", HTTP_GET, [&]() {
     Serial.println("SSDP schema");//////////////////////////////////////////////
@@ -219,4 +220,3 @@ void loop() {
   }//endif
 
 }//void loop
-
