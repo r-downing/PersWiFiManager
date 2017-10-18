@@ -1,47 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html ng-app='espScanner'>
 
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />		
-	<title>Sous Vide Control</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ESP8266 Device Scanner</title>
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-cookies.min.js"></script>
 
 	<script>
-	$(document).ready(function(){
 
-		window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   //compatibility for firefox and chrome
-    var pc = new RTCPeerConnection({iceServers:[]}), noop = function(){};      
-    pc.createDataChannel("");    //create a bogus data channel
-    pc.createOffer(pc.setLocalDescription.bind(pc), noop);    // create offer and set local description
-    pc.onicecandidate = function(ice){  //listen for candidate events
-        if(!ice || !ice.candidate || !ice.candidate.candidate)  return;
-        var myIP = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
-        console.log('my IP: ', myIP);  
-        console.log(ice.candidate.candidate);
-        pc.onicecandidate = noop;
-				var IP = myIP.split('.');
+		var espScanner = angular.module('espScanner', ['ngCookies']);
+		espScanner.controller('mainController', function ($scope, $http, $interval, $cookies) {
 
-				for(let i=0;i<255;i++){
-					let ips = 'http://'+IP[0]+'.'+IP[1]+'.'+IP[2]+'.'+i;
-					$.getJSON((ips +'/nocache/esp8266-project.json'), function(data){
-						console.log("success");
-						console.log("data from: "+ips);
-						console.log(data);
-						$('#loadspan').append('<a href="'+ips+'">'+data.device_name+' ('+ips+')</a>')
-					});
+			$scope.maskN = 24;
 
+				window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   //compatibility for firefox and chrome
+				var pc = new RTCPeerConnection({ iceServers: [] }), noop = function () { };
+				pc.createDataChannel("");    //create a bogus data channel
+				pc.createOffer(pc.setLocalDescription.bind(pc), noop);    // create offer and set local description
+				pc.onicecandidate = function (ice) {  //listen for candidate events
+					if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+					$scope.myIP = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
+					console.log('my IP: ', $scope.myIP);
+					console.log(ice.candidate.candidate);
+					pc.onicecandidate = noop;
+
+					$scope.calcSubnet();
+					$scope.$apply();
+				};
+
+			$scope.calcSubnet = function () {
+				var ipc = [0, 0, 0, 0];
+
+				for (i = 0; i < 32; i++) {
+					ipc[Math.floor(i / 8)] = ipc[Math.floor(i / 8)] * 2 + ((i < $scope.maskN) ? 1 : 0);
 				}
-    };
-    
+				console.log($scope.myIP);
+				var parts = $scope.myIP.split('.');
+				var subnetMin = [];
+				var subnetMax = [];
+				for (i = 0; i < 4; i++) {
+					subnetMin.push(parseInt(parts[i]) & ipc[i]);
+					subnetMax.push(255 - ipc[i] + subnetMin[i]);
+				}
+				console.log(subnetMin);
+				console.log(subnetMax);
 
+				$scope.subnetMin = subnetMin;//
+				$scope.subnetMinDisp = subnetMin.join('.');
+				$scope.subnetMax = subnetMax;//
+				$scope.subnetMaxDisp = subnetMax.join('.');
+			}
 
-	});
+			$scope.$watch('maskN', $scope.calcSubnet);
+
+			$scope.scan = function () {
+				$scope.devices = [];
+				$scope.scanning = 0;
+				$scope.scanned = 0;
+
+				$scope.calcSubnet();
+
+				var ip = [0, 0, 0, 0];
+				for (ip[0] = $scope.subnetMin[0]; ip[0] <= $scope.subnetMax[0]; ip[0]++) {
+					for (ip[1] = $scope.subnetMin[1]; ip[1] <= $scope.subnetMax[1]; ip[1]++) {
+						for (ip[2] = $scope.subnetMin[2]; ip[2] <= $scope.subnetMax[2]; ip[2]++) {
+							for (ip[3] = $scope.subnetMin[3]; ip[3] <= $scope.subnetMax[3]; ip[3]++) {
+								$scope.scanning++;
+								let ips = 'http://' + ip.join('.');
+								$http.get(ips + '/nocache/esp8266-project.json').then(function (res) {
+									res.data.ip = ips;
+									$scope.devices.push(res.data);
+									//update cookie
+									// https://stackoverflow.com/questions/12624181/how-to-set-expiration-date-for-cookie-in-angularjs
+								}).finally(function () {
+									$scope.scanned++;
+								});
+							}
+						}
+					}
+				}
+
+			}; //$scope.scan
+		}); //espScanner
+
 	</script>
 </head>
 
-<body>
-
-content: <span id="loadspan"></span>
+<body ng-controller='mainController'>
+	Subnet Mask:
+	<input type='number' min='1' max=31 ng-model='maskN' />
+	<button ng-click='scan()' ng-show='scanned==scanning'>Scan</button>
+	<span ng-show='scanned!=scanning'>Scanning {{scanned}}/{{scanning}}...</span>
+	<br> {{subnetMinDisp}} - {{subnetMaxDisp}}
+	<br>
+	<h6> Local IP: {{myIP}}</h6>
+	<h3 ng-show='scanning'>{{devices.length}} Devices Found</h3>
+	<span ng-repeat='d in devices'>
+		<a href="{{d.ip}}">{{d.device_name}}</a>
+	</span>
 
 </body>
+
 </html>
