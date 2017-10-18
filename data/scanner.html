@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />		
+	<title>Sous Vide Control</title>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+	<script>
+	$(document).ready(function(){
+
+		window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;   //compatibility for firefox and chrome
+    var pc = new RTCPeerConnection({iceServers:[]}), noop = function(){};      
+    pc.createDataChannel("");    //create a bogus data channel
+    pc.createOffer(pc.setLocalDescription.bind(pc), noop);    // create offer and set local description
+    pc.onicecandidate = function(ice){  //listen for candidate events
+        if(!ice || !ice.candidate || !ice.candidate.candidate)  return;
+        var myIP = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
+        console.log('my IP: ', myIP);  
+        console.log(ice.candidate.candidate);
+        pc.onicecandidate = noop;
+				var IP = myIP.split('.');
+
+				for(let i=0;i<255;i++){
+					let ips = 'http://'+IP[0]+'.'+IP[1]+'.'+IP[2]+'.'+i;
+					$.getJSON((ips +'/nocache/esp8266-project.json'), function(data){
+						console.log("success");
+						console.log("data from: "+ips);
+						console.log(data);
+						$('#loadspan').append('<a href="'+ips+'">'+data.device_name+' ('+ips+')</a>')
+					});
+
+				}
+    };
+    
+
+
+	});
+	</script>
+</head>
+
+<body>
+
+content: <span id="loadspan"></span>
+
+</body>
+</html>
