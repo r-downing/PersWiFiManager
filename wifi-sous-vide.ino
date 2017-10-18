@@ -93,17 +93,9 @@ void networkSetup() {
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
   //allows serving of files from SPIFFS
   SPIFFS.begin();
+  
   server.onNotFound([]() {
-    Serial.println("onNotFound");/////////////////////////////////////////////////
-    if (!handleFileRead(server.uri()))
-      //if (WiFi.status() != WL_CONNECTED) {
-      //server.sendHeader("Location", String("/"), true);
-      //server.send ( 302, "text/plain", "");//handleFileRead("/");
-      //} else {
-      Serial.println("send 200 filenotfound");//////////////////////////////
-    server.send(302, "text/html", metaRefreshStr);
-    //server.send(200, "text/plain", "<a href='/'>home</a>");
-    //}
+    if (!handleFileRead(server.uri())) server.send(302, "text/html", metaRefreshStr);
   }); //server.onNotFound
 
   //run a scan for wifi networks on setup
