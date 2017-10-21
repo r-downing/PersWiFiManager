@@ -1,3 +1,6 @@
+#include <ArduinoJson.h>
+#include "WiFiClientPrint.h"
+
 #include <ESP8266WiFi.h>
 #include <ESP8266SSDP.h>
 #include <WiFiClient.h>
@@ -28,7 +31,7 @@ bool relayControl, powerOn;
 AutoPIDRelay myPID(&temperature, &setTemp, &relayControl, 5000, .12, .0003, 0);
 
 const char *metaRefreshStr = R"====(
-<head><meta http-equiv="refresh" content="3; url=/" /></head><body><a href="/">redirecting...</a></body>
+<head><meta http-equiv="refresh" content="1; url=/" /></head><body><a href="/">redirecting...</a></body>
 )====";
 
 unsigned long lastTempUpdate;
@@ -153,11 +156,33 @@ void networkSetup() {
     if (server.hasArg("powerOff")) {
       powerOn = false;
     }//if
+
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
+    json["temperature"]=temperature;
+    json["setTemp"] = setTemp;
+    json["power"] = myPID.getPulseValue();
+    json["running"] = powerOn;
+    json["uptime"] = ((timeAtTemp) ? (millis() - timeAtTemp) : 0);
+    if(temperature < -190) json["error"]="sensor fault";
+    server.setContentLength(json.measureLength());
+    server.send(200, "application/json", "");
+//    json.printTo(server.client());
+//    server.client.stop();        
+    WiFiClientPrint<> p(server.client());
+    json.printTo(p);
+    p.stop(); // Calls p.flush() and WifiClient.stop()
+    
+  
+
+    /*
     Serial.println("Server.send json io");///////////////////////////////////////
     server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
                 + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn ? "true" : "false")
                 + ",\"upTime\":" + ((timeAtTemp) ? (millis() - timeAtTemp) : 0) + "}"
                );
+
+               */
   }); //server.on io
   
   //SSDP makes device visible on windows network
