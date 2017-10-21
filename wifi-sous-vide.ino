@@ -120,6 +120,25 @@ void networkSetup() {
     server.client().stop();
   }); //server.on /wifi/list.json
 
+  server.on("/wifi/api", []() {
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject &json = jsonBuffer.createObject();
+    if (server.hasArg("n")) {
+      int n = server.arg("n").toInt();
+      if (n >= scannedNetworks) return;
+      json["n"] = n;
+      json["ssid"] = WiFi.SSID(n);
+      json["signal"] = WiFi.RSSI(n) + 100;
+      json["encrypted"] = !(WiFi.encryptionType(n) == ENC_TYPE_NONE);
+    } else {
+      json["networks"] = scannedNetworks;
+      if(WiFi.status() == WL_CONNECTED) json["connected"] = WiFi.SSID();
+    }
+    char jsonchar[200];
+    json.printTo(jsonchar);
+    server.send(200, "application/json", jsonchar);
+  });
+
   server.on("/wifi/wps", []() {
     server.send(200, "text/html", "WPS");
     WiFi.mode(WIFI_STA);
@@ -157,7 +176,8 @@ void networkSetup() {
     json["power"] = myPID.getPulseValue();
     json["running"] = powerOn;
     json["upTime"] = ((timeAtTemp) ? (millis() - timeAtTemp) : 0);
-    if (temperature < -190) json["error"] = "sensor fault";
+    JsonArray& errors = json.createNestedArray("errors");
+    if (temperature < -190) errors.add("sensor fault");
     char jsonchar[200];
     json.printTo(jsonchar);
     server.send(200, "application/json", jsonchar);

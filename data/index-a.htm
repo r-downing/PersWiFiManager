@@ -25,7 +25,7 @@
 		<br> Power Level: {{data.power*100}}%
 		<br> Running: {{data.running ? "On" : "Off"}}
 		<br> Time @ Temp: {{upTimeDisp}}
-		<br> <span class="smalltext error" ng-show="data.error">Error: {{data.error}}</span>
+		<br> <span class="smalltext error" ng-show="data.errors.length">Errors: {{data.errors}}</span>
 		<br><span class="smalltext" style="color:{{(tRefresh>10&&tRefresh%2)?'red':'black'}}">Last updated {{tRefresh}} seconds ago. <span ng-if="tx">Updating...</span></span>
 		<br>
 		<br>
