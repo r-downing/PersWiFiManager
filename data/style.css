@@ -23,6 +23,10 @@
 	font-weight: lighter;
 }
 
+.error {
+	color:red;
+}
+
 .dbutton{
 	background-color:#3388ff;border-radius: 
 	0.25em; padding:.25em; margin:.1em; color:white; text-decoration:none;

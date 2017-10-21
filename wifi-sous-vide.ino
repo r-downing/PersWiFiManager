@@ -1,6 +1,4 @@
 #include <ArduinoJson.h>
-#include "WiFiClientPrint.h"
-
 #include <ESP8266WiFi.h>
 #include <ESP8266SSDP.h>
 #include <WiFiClient.h>
@@ -11,9 +9,6 @@
 #include "AutoPID.h"
 //#include "AutoPID.cpp"
 #define WIFI_CONNECT_TIMEOUT 30
-extern "C" {
-#include "user_interface.h"
-}
 
 #define RELAY_PIN D7
 #define PULSEWIDTH 5000
@@ -30,9 +25,7 @@ unsigned long timeAtTemp;
 bool relayControl, powerOn;
 AutoPIDRelay myPID(&temperature, &setTemp, &relayControl, 5000, .12, .0003, 0);
 
-const char *metaRefreshStr = R"====(
-<head><meta http-equiv="refresh" content="1; url=/" /></head><body><a href="/">redirecting...</a></body>
-)====";
+const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"1; url=/\" /></head><body><a href=\"/\">redirecting...</a></body>";
 
 unsigned long lastTempUpdate;
 void updateTemperature() {
@@ -41,7 +34,7 @@ void updateTemperature() {
     lastTempUpdate = millis();
     temperatureSensors.requestTemperatures();
   }
-}//void updateTemperature
+} //void updateTemperature
 
 ESP8266WebServer server(80);
 int scannedNetworks, scanssid;
@@ -70,33 +63,36 @@ bool handleFileRead(String path) {
   if (SPIFFS.exists(pathGz) || SPIFFS.exists(path)) {
     Serial.println("sending file " + path);
     File file = SPIFFS.open(SPIFFS.exists(pathGz) ? pathGz : path, "r");
-    if(server.hasArg("download")) server.sendHeader("Content-Disposition", " attachment;");
-    if (server.uri().indexOf("nocache") < 0) server.sendHeader("Cache-Control", " max-age=172800");
+    if (server.hasArg("download"))
+      server.sendHeader("Content-Disposition", " attachment;");
+    if (server.uri().indexOf("nocache") < 0)
+      server.sendHeader("Cache-Control", " max-age=172800");
     size_t sent = server.streamFile(file, contentType);
     file.close();
     return true;
-  }//if SPIFFS.exists
+  } //if SPIFFS.exists
   return false;
-}//bool handleFileRead
+} //bool handleFileRead
 
 void networkSetup() {
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin();
-  Serial.println("WiFi.begin");/////////////////////////////////////////////////
+  Serial.println("WiFi.begin"); /////////////////////////////////////////////////
   unsigned long connectTime = millis();
-  while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED) delay(10);
-  if (WiFi.status() != WL_CONNECTED) {  //if timed out, switch to AP mode
-    Serial.println("WIFI_AP");////////////////////////////////////////////////////
+  while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED)
+    delay(10);
+  if (WiFi.status() != WL_CONNECTED) { //if timed out, switch to AP mode
+    Serial.println("WIFI_AP"); ////////////////////////////////////////////////////
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Sous Vide WiFi");
-  }//if
+  } //if
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
   //allows serving of files from SPIFFS
   SPIFFS.begin();
-  
+
   server.onNotFound([]() {
     if (!handleFileRead(server.uri())) server.send(302, "text/html", metaRefreshStr);
   }); //server.onNotFound
@@ -110,7 +106,7 @@ void networkSetup() {
     server.send(302, "text/plain", "");
   });
 
-  server.on("/wifi/list.json", [](){
+  server.on("/wifi/list.json", []() {
     server.setContentLength(CONTENT_LENGTH_UNKNOWN);
     server.send(200, "application/json", "");
     String cssid = WiFi.SSID();
@@ -119,12 +115,8 @@ void networkSetup() {
     for (int i = 0; i < scannedNetworks; i++) {
       String ssid = WiFi.SSID(i);
       ssid.replace("\"", "\\\"");
-      server.sendContent("{\"ssid\":\"" + ssid + "\","
-                         + "\"signal\":" + (WiFi.RSSI(i) + 100) + ","
-                         + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true")
-                         + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}")
-                        );
-    }//for
+      server.sendContent("{\"ssid\":\"" + ssid + "\"," + "\"signal\":" + (WiFi.RSSI(i) + 100) + "," + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true") + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}"));
+    } //for
     server.client().stop();
   }); //server.on /wifi/list.json
 
@@ -137,60 +129,45 @@ void networkSetup() {
   }); //server.on /wifi/wps
 
   server.on("/wifi/connect", []() {
-    if (server.hasArg("ssid") || server.hasArg("ssidn")) { //connects to specified wifi network, then reboots
+    if (server.hasArg("ssid") || server.hasArg("ssidn"))
+    { //connects to specified wifi network, then reboots
       WiFi.mode(WIFI_STA);
       String ssid = server.hasArg("ssid") ? server.arg("ssid") : WiFi.SSID(server.arg("ssidn").toInt());
       server.hasArg("password") ? WiFi.begin(ssid.c_str(), server.arg("password").c_str()) : WiFi.begin(ssid.c_str());
       delay(100);
       ESP.restart();
-    }//if
+    } //if
   }); //server.on /wifi/connect
 
   //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
-    Serial.println("server.on /io");/////////////////////////////////////////////
+    Serial.println("server.on /io"); /////////////////////////////////////////////
     if (server.hasArg("setTemp")) {
       powerOn = true;
       setTemp = server.arg("setTemp").toFloat();
-    }//if
+    } //if
     if (server.hasArg("powerOff")) {
       powerOn = false;
-    }//if
+    } //if
 
     StaticJsonBuffer<200> jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-    json["temperature"]=temperature;
+    JsonObject &json = jsonBuffer.createObject();
+    json["temperature"] = temperature;
     json["setTemp"] = setTemp;
     json["power"] = myPID.getPulseValue();
     json["running"] = powerOn;
-    json["uptime"] = ((timeAtTemp) ? (millis() - timeAtTemp) : 0);
-    if(temperature < -190) json["error"]="sensor fault";
-    server.setContentLength(json.measureLength());
-    server.send(200, "application/json", "");
-//    json.printTo(server.client());
-//    server.client.stop();        
-    WiFiClientPrint<> p(server.client());
-    json.printTo(p);
-    p.stop(); // Calls p.flush() and WifiClient.stop()
-    
-  
+    json["upTime"] = ((timeAtTemp) ? (millis() - timeAtTemp) : 0);
+    if (temperature < -190) json["error"] = "sensor fault";
+    char jsonchar[200];
+    json.printTo(jsonchar);
+    server.send(200, "application/json", jsonchar);
 
-    /*
-    Serial.println("Server.send json io");///////////////////////////////////////
-    server.send(200, "application/json", String("") + "{\"temperature\":" + temperature + ",\"setTemp\":" + setTemp
-                + ",\"power\":" + myPID.getPulseValue() + ",\"running\":" + (powerOn ? "true" : "false")
-                + ",\"upTime\":" + ((timeAtTemp) ? (millis() - timeAtTemp) : 0) + "}"
-               );
-
-               */
   }); //server.on io
-  
+
   //SSDP makes device visible on windows network
   server.on("/description.xml", HTTP_GET, [&]() {
-    Serial.println("SSDP schema");//////////////////////////////////////////////
     SSDP.schema(server.client());
-  }
-           );
+  });
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
@@ -200,7 +177,7 @@ void networkSetup() {
 
   MDNS.begin("sousvide");
   MDNS.addService("http", "tcp", 80);
-}//void networkSetup
+} //void networkSetup
 
 void setup() {
   Serial.begin(115200); //for terminal debugging
@@ -216,7 +193,7 @@ void setup() {
 
   server.begin();
   Serial.println("setup complete.");
-}//void setup
+} //void setup
 
 void loop() {
   dnsServer.processNextRequest();
@@ -226,14 +203,15 @@ void loop() {
     myPID.run();
     digitalWrite(RELAY_PIN, !relayControl);
     if (myPID.atSetPoint(2)) {
-      if (!timeAtTemp) timeAtTemp = millis();
+      if (!timeAtTemp)
+        timeAtTemp = millis();
     } else {
       timeAtTemp = 0;
     }
-  } else {
+  } else { //!powerOn
     timeAtTemp = 0;
     myPID.stop();
     digitalWrite(RELAY_PIN, HIGH);
-  }//endif
-
-}//void loop
+  } //endif
+  //Serial.println(millis());
+} //void loop
