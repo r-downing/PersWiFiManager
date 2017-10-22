@@ -7,8 +7,6 @@
 #include <DNSServer.h>
 #include <ESP8266mDNS.h>
 #include <FS.h>
-//#include "AutoPID.h"
-////#include "AutoPID.cpp"
 #define WIFI_CONNECT_TIMEOUT 30
 
 #define RELAY_PIN D7
