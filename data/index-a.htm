@@ -29,15 +29,7 @@
 		<br><span class="smalltext" style="color:{{(tRefresh>10&&tRefresh%2)?'red':'black'}}">Last updated {{tRefresh}} seconds ago. <span ng-if="tx">Updating...</span></span>
 		<br>
 		<br>
-		<div id="nav">
-			<a href="/" class="dbutton">Home</a>
-			<br>
-			<a href="graph.htm" class="dbutton">Graph</a>
-			<br>
-			<a href="recipes.htm" class="dbutton">Recipes</a>
-			<br>
-			<a href="wifi.htm" class="dbutton">WiFi Setup</a>
-		</div>
+		<ng-include src="'nav.htm'"></ng-include>
 	</div>
 
 </body>

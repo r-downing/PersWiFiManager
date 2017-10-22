@@ -1,75 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="wifi">
 
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />				
-	<title>Sous Vide WiFi</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Sous Vide Control</title>
+	<link rel="manifest" href="/manifest.json">
 	<script src="jquery-3.2.1.min.js"></script>
+	<script src="angular.min.js"></script>
 	<script>
-		var w = {};
+		var wifi = angular.module('wifi', []);
+		wifi.controller('mainController', function ($scope, $http, $interval) {
 
-		updateWifiList = function () {
-			$.get("/wifi/list.json", function (data) {
-				$('#wifistatus').html((data.connected?("Connected to "+data.connected):"Not connected"));
-				$(data.networks).each(function (i, e) {
-					$("<span></span>").html(e.ssid)
-						.append('<br>')
-						.append(((e.encrypted) ? "\uD83D\uDD12 " : "\u26a0 ") + "\uD83D\uDCF6=" + e.signal)
-						.addClass('rbutton')
-						.click(function () {
-							w.ssidn = i;
-							if (e.encrypted) {
-								w.password = prompt("Enter password for " + e.ssid);
-								if (w.password == null) return;
-							}
-							if (confirm("Connect to " + e.ssid + "?")) $.post('/wifi/connect', w);
+			$scope.setSel = function (n) {
+			$scope.sel = n;
+				console.log($scope.sel);
+			};
 
-						})
-						.appendTo('#wifilist');
+			$scope.getNetworks = function (i) {
+				$http.get('/wifi/info?n=' + i).then(function (res) {
+					console.log(res.data);
+					if (!$scope.names.includes(res.data.ssid + res.data.encrypted)) {
+						$scope.networks.push(res.data);
+						$scope.names.push(res.data.ssid + res.data.encrypted);
+					}
+					if (res.data.n < $scope.status.networks - 1) {
+						$scope.getNetworks(res.data.n + 1);
+					}
 				});
-			});
-		};
+			};
 
-		$(document).ready(function () {
-			$.ajaxSetup({timeout:900000});
-			$('#loadnav').load('index.htm #nav');
-			updateWifiList();
+			$scope.connect = function (n) {
+				console.log($.param(n));
+				$http.post('/wifi/connect', $.param(n));
+			}
 
-			$('#manual').click(function () {
-				w = {};
-				w.ssid = prompt("Enter network name");
-				if (w.ssid == null) return;
-				var p = prompt("Enter password (blank for open wifi");
-				if (p == null) return;
-				if (p.length) w.password = p;
-				if (confirm("Connect to " + w.ssid + "?")) $.post('/wifi/connect', w);
+			$scope.wps = function () {
+				if ($window.confirm("Start WPS Setup?")) $http.get('/wifi/wps');
+			}
+
+			$http.get('/wifi/info').then(function (res) {
+				console.log(res.data);
+				$scope.networks = [{}];
+				$scope.names = [];
+				if (res.data.networks) $scope.getNetworks(0);
+				$scope.status = res.data;
 			});
 
-			$('#wps').click(function () {
-				if (confirm("Start WPS setup?")) $.post('/wifi/wps');
-			});
-		});
+		}); //wifi
+
 	</script>
-
 	<link rel="stylesheet" type="text/css" href="style.css">
-
 </head>
 
-<body>
-
-	<div id="main">
-		WiFi Status: <br>
-		<span id="wifistatus" class="smalltext">Loading...</span><br>
-		<span class="smalltext">Changing WiFi settings will reboot the device.</span>
-		<br>
-		WiFi Networks:
-		<div id="wifilist"></div><br>
-		<span id="manual" class='rbutton'>Manual</span>
-		<span id="wps" class='rbutton'>WPS Setup<br>
+<body ng-controller="mainController">
+	WiFi Status:
+	<br>
+	<span class="smalltext">{{status.connected?("Connected to "+status.connected):"Not connected"}}</span>
+	<br>
+	<span class="smalltext">Changing WiFi settings will reboot the device. </span>
+	<br> Available networks:
+	<br>
+	<div ng-repeat="nw in networks" class="rbutton" ng-click="setSel(nw)" style="{{sel==nw?('background-color:orange'):''}}">
+		{{(nw.n==null)?"Manual...":nw.ssid}}
+		<span ng-if="nw.n==null && sel==nw">
+			<br>
+			<input type="text" placeholder="ssid" ng-model="nw.ssid" />
+			<br>
+			<label class="smalltext">Encrypted?
+				<input type="checkbox" ng-model="nw.encrypted" />
+			</label>
 		</span>
-		<br>
-		<div id="loadnav"></div>
+		<span ng-if="nw.n!=null">
+			<br> {{((nw.encrypted) ? "\uD83D\uDD12 " : "\u26a0 ") + "\uD83D\uDCF6=" + nw.signal}} {{nw.ssid==status.connected?"Connected.":""}}
+		</span>
+		<span ng-if="sel==nw && nw.encrypted">
+			<br>
+			<input placeholder="password" ng-model="nw.pw" type="password" />
+		</span>
+		<span ng-if="sel==nw && nw.ssid.length && (!nw.encrypted || nw.pw.length)">
+			<br>
+			<button ng-click="connect(nw)">Connect</button>
+		</span>
 	</div>
+	<div class="rbutton" ng-click="wps()">WPS Setup...</div>
+	<br>
+	<br>
+	<ng-include src="'nav.htm'"></ng-include>
 
 
 </body>
