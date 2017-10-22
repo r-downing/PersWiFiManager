@@ -100,27 +100,28 @@ void networkSetup() {
   //run a scan for wifi networks on setup
   scannedNetworks = WiFi.scanNetworks();
 
+
+
+//  server.on("/wifi/list.json", []() {
+//    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+//    server.send(200, "application/json", "");
+//    String cssid = WiFi.SSID();
+//    cssid.replace("\"", "\\\"");
+//    server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
+//    for (int i = 0; i < scannedNetworks; i++) {
+//      String ssid = WiFi.SSID(i);
+//      ssid.replace("\"", "\\\"");
+//      server.sendContent("{\"ssid\":\"" + ssid + "\"," + "\"signal\":" + (WiFi.RSSI(i) + 100) + "," + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true") + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}"));
+//    } //for
+//    server.client().stop();
+//  }); //server.on /wifi/list.json
+
   server.on("/wifi/rescan", []() {
     scannedNetworks = WiFi.scanNetworks();
-    server.sendHeader("Location", "/wifi/list.json", true);
-    server.send(302, "text/plain", "");
+    server.send(200, "text/html", "");
   });
 
-  server.on("/wifi/list.json", []() {
-    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-    server.send(200, "application/json", "");
-    String cssid = WiFi.SSID();
-    cssid.replace("\"", "\\\"");
-    server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
-    for (int i = 0; i < scannedNetworks; i++) {
-      String ssid = WiFi.SSID(i);
-      ssid.replace("\"", "\\\"");
-      server.sendContent("{\"ssid\":\"" + ssid + "\"," + "\"signal\":" + (WiFi.RSSI(i) + 100) + "," + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true") + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}"));
-    } //for
-    server.client().stop();
-  }); //server.on /wifi/list.json
-
-  server.on("/wifi/api", []() {
+  server.on("/wifi/info", []() {
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
     if (server.hasArg("n")) {
@@ -148,11 +149,11 @@ void networkSetup() {
   }); //server.on /wifi/wps
 
   server.on("/wifi/connect", []() {
-    if (server.hasArg("ssid") || server.hasArg("ssidn"))
+    if (server.hasArg("ssid") || server.hasArg("n"))
     { //connects to specified wifi network, then reboots
       WiFi.mode(WIFI_STA);
-      String ssid = server.hasArg("ssid") ? server.arg("ssid") : WiFi.SSID(server.arg("ssidn").toInt());
-      server.hasArg("password") ? WiFi.begin(ssid.c_str(), server.arg("password").c_str()) : WiFi.begin(ssid.c_str());
+      String ssid = server.hasArg("n") ? WiFi.SSID(server.arg("n").toInt()): server.arg("ssid");
+      (server.hasArg("encrypted") && server.arg("encrypted").equals("true")) ? WiFi.begin(ssid.c_str(), server.arg("pw").c_str()) : WiFi.begin(ssid.c_str());
       delay(100);
       ESP.restart();
     } //if
@@ -160,7 +161,7 @@ void networkSetup() {
 
   //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
-    Serial.println("server.on /io"); /////////////////////////////////////////////
+    Serial.println("server.on /io");////////////////////////
     if (server.hasArg("setTemp")) {
       powerOn = true;
       setTemp = server.arg("setTemp").toFloat();
