@@ -9,7 +9,7 @@
 	<script src="angular.min.js"></script>
 	<script>
 		var wifi = angular.module('wifi', []);
-		wifi.controller('mainController', function ($scope, $http, $interval) {
+		wifi.controller('mainController', function ($scope, $http, $window) {
 
 			$scope.setSel = function (n) {
 			$scope.sel = n;
@@ -17,7 +17,7 @@
 			};
 
 			$scope.getNetworks = function (i) {
-				$http.get('/wifi/info?n=' + i).then(function (res) {
+				$http.post('/wifi/info', $.param({n:i})).then(function (res) {
 					console.log(res.data);
 					if (!$scope.names.includes(res.data.ssid + res.data.encrypted)) {
 						$scope.networks.push(res.data);
