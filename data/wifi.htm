@@ -30,7 +30,7 @@
 			};
 
 			$scope.connect = function (n) {
-				console.log($.param(n));
+				if(!n.encrypted && !$window.confirm("Unsecure network. Are you sure?")) return;
 				$http.post('/wifi/connect', $.param(n));
 			}
 
