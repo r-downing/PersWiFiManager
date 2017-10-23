@@ -12,6 +12,8 @@
 #define RELAY_PIN D7
 #define PULSEWIDTH 5000
 
+#define DEVICE_NAME "Sous Vide"
+
 //temperature sensor libraries and variables
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -85,7 +87,7 @@ void networkSetup() {
     Serial.println("WIFI_AP"); ////////////////////////////////////////////////////
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    WiFi.softAP("Sous Vide WiFi");
+    WiFi.softAP(DEVICE_NAME);
   } //if
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
@@ -98,22 +100,6 @@ void networkSetup() {
 
   //run a scan for wifi networks on setup
   scannedNetworks = WiFi.scanNetworks();
-
-
-
-//  server.on("/wifi/list.json", []() {
-//    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-//    server.send(200, "application/json", "");
-//    String cssid = WiFi.SSID();
-//    cssid.replace("\"", "\\\"");
-//    server.sendContent("{" + ((WiFi.status() == WL_CONNECTED) ? ("\"connected\":\"" + cssid + "\",") : "") + "\"networks\":[\n");
-//    for (int i = 0; i < scannedNetworks; i++) {
-//      String ssid = WiFi.SSID(i);
-//      ssid.replace("\"", "\\\"");
-//      server.sendContent("{\"ssid\":\"" + ssid + "\"," + "\"signal\":" + (WiFi.RSSI(i) + 100) + "," + "\"encrypted\":" + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "false" : "true") + "}" + ((i < scannedNetworks - 1) ? ",\n" : "]}"));
-//    } //for
-//    server.client().stop();
-//  }); //server.on /wifi/list.json
 
   server.on("/wifi/rescan", []() {
     scannedNetworks = WiFi.scanNetworks();
@@ -132,7 +118,7 @@ void networkSetup() {
       json["encrypted"] = !(WiFi.encryptionType(n) == ENC_TYPE_NONE);
     } else {
       json["networks"] = scannedNetworks;
-      if(WiFi.status() == WL_CONNECTED) json["connected"] = WiFi.SSID();
+      if (WiFi.status() == WL_CONNECTED) json["connected"] = WiFi.SSID();
     }
     char jsonchar[200];
     json.printTo(jsonchar);
@@ -151,7 +137,7 @@ void networkSetup() {
     if (server.hasArg("ssid") || server.hasArg("n"))
     { //connects to specified wifi network, then reboots
       WiFi.mode(WIFI_STA);
-      String ssid = server.hasArg("n") ? WiFi.SSID(server.arg("n").toInt()): server.arg("ssid");
+      String ssid = server.hasArg("n") ? WiFi.SSID(server.arg("n").toInt()) : server.arg("ssid");
       (server.hasArg("encrypted") && server.arg("encrypted").equals("true")) ? WiFi.begin(ssid.c_str(), server.arg("pw").c_str()) : WiFi.begin(ssid.c_str());
       delay(100);
       ESP.restart();
@@ -184,13 +170,22 @@ void networkSetup() {
 
   }); //server.on io
 
+  server.on("/esp8266-project.json", [] () {
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject &json = jsonBuffer.createObject();
+    json["device_name"] = DEVICE_NAME;
+    char jsonchar[200];
+    json.printTo(jsonchar);
+    server.send(200, "application/json", jsonchar);
+  });
+
   //SSDP makes device visible on windows network
-  server.on("/description.xml", HTTP_GET, [&]() {
+  server.on("/description.xml", HTTP_GET, []() {
     SSDP.schema(server.client());
   });
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
-  SSDP.setName("Sous Vide (" + WiFi.localIP().toString() + ")");
+  SSDP.setName(DEVICE_NAME);
   SSDP.setURL("/");
   SSDP.begin();
   SSDP.setDeviceType("upnp:rootdevice");
