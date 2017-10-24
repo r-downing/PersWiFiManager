@@ -69,7 +69,7 @@
 							for (ip[3] = $scope.subnetMin[3]; ip[3] <= $scope.subnetMax[3]; ip[3]++) {
 								$scope.scanning++;
 								let ips = 'http://' + ip.join('.');
-								$http.get(ips + '/nocache/esp8266-project.json').then(function (res) {
+								$http.get(ips + '/esp8266-project.json').then(function (res) {
 									res.data.ip = ips;
 									$scope.devices.push(res.data);
 									//update cookie

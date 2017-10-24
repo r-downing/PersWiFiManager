@@ -5,10 +5,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Sous Vide Control</title>
 	<link rel="manifest" href="/manifest.json">
-	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<!-- <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>	
 	<script> window.jQuery || document.write('<script src="jquery-3.2.1.min.js">\x3C/script>') </script>
-	<script> window.angular || document.write('<script src="angular.min.js">\x3C/script>') </script>
+	<script> window.angular || document.write('<script src="angular.min.js">\x3C/script>') </script> -->
+	<script src="jquery-3.2.1.min.js"></script>
+	<script src="angular.min.js"></script>
+	<script type="text/javascript">
+		setTimeout(function(){
+			if(!window.jQuery || !window.angular) location.reload();
+		},10000);
+	</script>
 	<script>
 		var wifi = angular.module('wifi', []);
 		wifi.controller('mainController', function ($scope, $http, $window) {
