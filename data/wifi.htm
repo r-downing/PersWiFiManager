@@ -39,9 +39,6 @@
 					var t=e.split(":");
 					if(e.length) $scope.data.push({s:t.shift(),e:t.shift(),n:t.join(":")});
 				});
-				console.log($scope.data);
-				//$scope.data = res.data;
-				//$scope.data.push({man:true});
 			});
 		}); //wifi
 
@@ -58,14 +55,7 @@
 	<br> Available networks:
 	<br>
 	<div ng-repeat="nw in data" class="rbutton" ng-click="setSel(nw)" style="{{sel==nw?('background-color:orange'):''}}">
-		{{nw.man?"Manual":nw.n}} <span style="float:right">{{nw.s}}%</span>
-		<span ng-if="nw.man">
-			<input type="text" placeholder="ssid" ng-model="nw.n" ng-if="nw.man"/>
-			<br>
-			<label class="smalltext">Encrypted?
-					<input type="checkbox" ng-model="nw.e" />
-			</label>
-		</span>
+	 	{{nw.n}} <span style="float:right">{{nw.s}}%</span>
 		<span ng-if="sel==nw && nw.e">
 			<br>
 			<input placeholder="password" ng-model="nw.p" type="password" />
@@ -74,26 +64,6 @@
 			<br>
 			<button ng-click="connect(nw)">Connect</button>
 		</span> 
-		
-
-		<!-- {{(nw.n==null)?"Manual...":nw.n}}
-			<br>
-			<input type="text" placeholder="ssid" ng-model="nw.n" />
-			<br>
-			<label class="smalltext">Encrypted?
-				<input type="checkbox" ng-model="nw.e" />
-			</label>
-		<span ng-if="nw.n!=null">
-			<br> {{((nw.encrypted) ? "\uD83D\uDD12 " : "\u26a0 ") + "\uD83D\uDCF6=" + nw.signal}} {{nw.ssid==status.connected?"Connected.":""}}
-		</span>
-		<span ng-if="sel==nw && nw.e">
-			<br>
-			<input placeholder="password" ng-model="nw.p" type="password" />
-		</span>
-		<span ng-if="sel==nw && nw.ssid.length && (!nw.encrypted || nw.pw.length)">
-			<br>
-			<button ng-click="connect(nw)">Connect</button>
-		</span> -->
 	</div>
 	<div class="rbutton" ng-click="wps()">WPS Setup...</div>
 	<br>
