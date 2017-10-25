@@ -106,6 +106,47 @@ void networkSetup() {
     server.send(200, "text/html", "");
   });
 
+  server.on("/wf", [] () {
+    int n = WiFi.scanNetworks();
+    int ix[n];
+    for (int i = 0; i < n; i++) ix[i] = i;
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < i; j++) {
+        if (i == -1 || j == -1) continue;
+        if (WiFi.RSSI(ix[i]) > WiFi.RSSI(ix[j])) std::swap(ix[i], ix[j]); //swap (bubble sort by signal)
+        if (WiFi.SSID(ix[i]).equals(WiFi.SSID(ix[j]))) ix[j] = -1; //mark duplicates for skipping
+      }//for j
+    }//for i
+
+/*
+    StaticJsonBuffer<1500> jsonBuffer;
+    JsonObject &json = jsonBuffer.createObject();
+    JsonArray &nl = json.createNestedArray("n");
+    */
+
+    String s="";
+    for (int i = 0; i < n; i++) {
+      if (ix[i] != -1) {
+        s+=String("\n")+((constrain(WiFi.RSSI(ix[i]), -100, -50) + 100) * 2) + ":" + ((WiFi.encryptionType(ix[i]) == ENC_TYPE_NONE)?0:1) + ":" + WiFi.SSID(ix[i]);
+        
+        //JsonObject &n = nl.createNestedObject();
+        //n["n"] = WiFi.SSID(ix[i]);
+        //n["s"] = (constrain(WiFi.RSSI(ix[i]), -100, -50) + 100) * 2;
+        //if(WiFi.encryptionType(ix[i]) != ENC_TYPE_NONE) n["e"]=1;
+      }
+    }
+
+    server.send(200, "text/plain", s);
+/*
+    char jsonchar[1500];
+    json.printTo(jsonchar);
+    Serial.println();
+    Serial.println(jsonchar);
+    server.send(200, "application/json", jsonchar);
+    */
+  });
+
   server.on("/wifi/info", []() {
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
@@ -196,6 +237,8 @@ void networkSetup() {
 
 void setup() {
   Serial.begin(115200); //for terminal debugging
+  Serial.println();
+
 
   //set up temperature sensors and relay output
   temperatureSensors.begin();
