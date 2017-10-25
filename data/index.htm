@@ -2,43 +2,96 @@
 <html ng-app="sousVide">
 
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 	<title>Sous Vide Control</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
 	<script src="/jquery-3.2.1.min.js"></script>
 	<script src="/angular.min.js"></script>
-	<script src="core.js"></script>		
+	<script src="core.js"></script>
+
+	<style>
+		div,
+		input {
+			padding: 5px;
+			font-size: 1em;
+		}
+
+		input {
+			width: 95%;
+		}
+
+		body {
+			text-align: center;
+			font-family: verdana;
+			font-size:1.1em;
+		}
+
+		button {
+			border: 0;
+			border-radius: 0.3rem;
+			background-color: #1fa3ec;
+			color: #fff;
+			line-height: 2.4rem;
+			font-size: 1.2rem;
+			width: 44%;
+			display: inline-block;
+			margin: 2%;
+		}
+
+		.q {
+			float: right;
+			text-align: right;
+		}
+
+		.smalltext {
+			font-size: 75%;
+			font-weight: lighter;
+		}
+
+		.error {
+			color: red;
+		}
+
+		.nav {
+			width: 100%;
+			align: center;
+		}
+	</style>
 </head>
 
 <body ng-controller="mainController">
 
-	<div id="main">
-		Current Set Point: {{data.setTemp}} &deg F
+	<div style='text-align:left;display:inline-block;min-width:300px;'>
 		<form ng-submit="submit(formData)">
-			<input type="number" ng-model="formData.setTemp" step=".1" min="0" max="400" />
-			<input class="dbutton" type="submit" value="Set" />
-			<button type="button" class="dbutton" ng-click="submit({powerOff:''})">Off</button>
+			<input type="number" placeholder="set temperature" id="st" ng-model="formData.setTemp" step=".1" min="0" max="400" />
+			<button type="submit">Set</button>
+			<button type="button" ng-click="submit({powerOff})">Off</button>
 		</form>
-
-		Current Temp: {{data.temperature}} &deg F
-		<br> Power Level: {{data.power*100}}%
-		<br> Running: {{data.running ? "On" : "Off"}}
-		<br> Time @ Temp: {{upTimeDisp}}
+		Current Set Point:
+		<a class="q">{{data.setTemp}} &degF</a>
+		<br> Current Temp:
+		<a class="q">{{data.temperature}} &degF</a>
+		<br> Power Level:
+		<a class="q">{{data.power*100}}%</a>
+		<br> Running:
+		<a class="q">{{data.running ? "On" : "Off"}}</a>
+		<br> Time @ Temp:
+		<a class="q">{{upTimeDisp}}</a>
 		<br>
 		<span class="smalltext error" ng-show="data.errors.length">Errors: {{data.errors}}</span>
 		<br>
-		<span class="smalltext" style="color:{{(tRefresh>10&&tRefresh%2)?'red':'black'}}">Last updated {{tRefresh}} seconds ago.
+		<span class="smalltext" style="color:{{(tRefresh>10&&tRefresh%2)?'red':'black'}}">Last updated {{tRefresh}} seconds ago.<br>
 			<span ng-if="tx">Updating...</span>
 		</span>
 		<br>
 		<br>
 		<span id="nav">
-				<a href="/">Home</a> | 
-				<a href="graph.htm">Graph</a> | 
-				<a href="recipes.htm">Recipes</a> | 
-				<a href="wifi.htm">WiFi Setup</a>
+			<a href="/">Home</a> |
+			<a href="graph.htm">Graph</a> |
+			<a href="recipes.htm">Recipes</a> |
+			<a href="wifi.htm">WiFi</a>
 		</span>
 	</div>
+
 </body>
 
 </html>

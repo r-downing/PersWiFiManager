@@ -7,8 +7,8 @@ sousVide.controller( 'mainController', function($scope, $http, $interval) {
 
 	$scope.submit = function(data){
 		$scope.tx = true;
-		$http.post('/io', $.param(data)).then(function(data) {
-			$scope.data = data.data;
+		$http.post('/io', $.param(data)).then(function(res) {
+			$scope.data = res.data;
 			$scope.upTimeDisp = (new Date($scope.data.upTime)).toISOString().substr(11, 8);
 			$scope.tRefresh = 0;
 		}).finally(function(){
@@ -17,6 +17,7 @@ sousVide.controller( 'mainController', function($scope, $http, $interval) {
 	};
 
 	$scope.submit({});
+	$('#st').focus();
 
 	$interval(function(){
 		if(!$scope.tx) {
