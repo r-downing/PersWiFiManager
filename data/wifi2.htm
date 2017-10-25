@@ -5,26 +5,32 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 	<title>Config ESP</title>
 	<script>
-		//	document.getElementById('wl').innerHTML+=("<div><a href='#p' onclick='c(this)'>"+n+"</a>&nbsp;<span class='q "+(d[n]>0?"l":"")+"'>"+Math.abs(d[n])+"</span></div>");
 
 		function c(l) { document.getElementById('s').value = l.innerText || l.textContent; document.getElementById('p').focus(); }
-		var xhttp = new XMLHttpRequest();
-		xhttp.onreadystatechange = function () {
-			if (this.readyState == 4 && this.status == 200) {
-				this.responseText.split("\n").forEach(function(e){
-					var t=e.split(":");
-					console.log([t.shift(),t.shift(),t.join(":")]);
-				});
-			}
+		function scan() {
+			var xhttp = new XMLHttpRequest(), wl = document.getElementById('wl');
+			wl.innerHTML = "Scanning...";
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					wl.innerHTML = "";
+					this.responseText.split("\n").forEach(function (e) {
+						var t = e.split(":");
+						var s = t.shift();
+						var c = parseInt(t.shift());
+						var n = t.join(":");
+						if (e.length) wl.innerHTML += ("<div><a href='#p' onclick='c(this)'>" + n
+							+ "</a>&nbsp;<span class='q "
+							+ "'>" + s + "%" + (c ? "\uD83D\uDD12" : "\u26A0") + "</span></div>");
+					});
+				}
+			};
+			xhttp.open("GET", "wifi/list", true);
+			xhttp.send();
 		};
-		xhttp.open("GET", "wf", true);
-		xhttp.send();
+
+
 	</script>
 	<style>
-		.c {
-			text-align: center;
-		}
-
 		div,
 		input {
 			padding: 5px;
@@ -48,6 +54,7 @@
 			line-height: 2.4rem;
 			font-size: 1.2rem;
 			width: 100%;
+			display:block;
 		}
 
 		.q {
@@ -55,33 +62,26 @@
 			width: 64px;
 			text-align: right;
 		}
-
-		.l {
-			background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEX///8EBwfBwsLw8PAzNjaCg4NTVVUjJiZDRUUUFxdiZGSho6OSk5Pg4eFydHTCjaf3AAAAZElEQVQ4je2NSw7AIAhEBamKn97/uMXEGBvozkWb9C2Zx4xzWykBhFAeYp9gkLyZE0zIMno9n4g19hmdY39scwqVkOXaxph0ZCXQcqxSpgQpONa59wkRDOL93eAXvimwlbPbwwVAegLS1HGfZAAAAABJRU5ErkJggg==") no-repeat left center;
-			background-size: 1em;
-		}
 	</style>
 </head>
 
 <body>
 	<div style='text-align:left;display:inline-block;min-width:260px;'>
+		<button onclick="scan()">Scan</button>
+		<br>
 		<span id='wl'></span>
-
-
-		<br/>
-		<form method='post' action='wifisave'>
-			<input id='s' name='s' length=32 placeholder='SSID'>
-			<br/>
+		<br>
+		<form method='post' action='/wifi/connect'>
+			<input id='s' name='n' length=32 placeholder='SSID'>
+			<br>
 			<input id='p' name='p' length=64 type='password' placeholder='password'>
-			<br/>
-			<br/>
-			<br/>
-			<button type='submit'>save</button>
+			<br>
+			<br>
+			<br>
+			<button type='submit'>Connect</button>
 		</form>
-		<br/>
-		<div class="c">
-			<a href="/wifi">Scan</a>
-		</div>
+		<br><br>
+		<button onclick="if(confirm('Start WPS Setup?')) window.location='#aaa'">WPS Setup</button>
 	</div>
 </body>
 
