@@ -7,11 +7,14 @@
 	<script>
 		function g(i) { return document.getElementById(i); };
 		function c(l) { g('s').value = l.innerText || l.textContent; g('p').focus(); };
+		var xh;
 		function scan() {
-			var xhttp = new XMLHttpRequest(), wl = g('wl');
+			if(xh) return;
+			xh = new XMLHttpRequest(), wl = g('wl');
 			wl.innerHTML = "Scanning...";
-			xhttp.onreadystatechange = function () {
+			xh.onreadystatechange = function () {
 				if (this.readyState == 4 && this.status == 200) {
+					xh=0;
 					wl.innerHTML = "";
 					this.responseText.split("\n").forEach(function (e, i) {
 						var t = e.split(":");
@@ -24,8 +27,8 @@
 					});
 				}
 			};
-			xhttp.open("GET", "wifi/list", true);
-			xhttp.send();
+			xh.open("GET", "wifi/list", true);
+			xh.send();
 		};
 
 	</script>
