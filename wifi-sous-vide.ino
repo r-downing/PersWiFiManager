@@ -75,10 +75,15 @@ bool handleFileRead(String path) {
   return false;
 } //bool handleFileRead
 
-void networkSetup() {
+void networkSetup(String ssid, String pass) {
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
-  WiFi.begin();
+  if (ssid.length()) {
+    if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
+    else WiFi.begin(ssid.c_str());
+  } else {
+    WiFi.begin();
+  }
   Serial.println("WiFi.begin"); /////////////////////////////////////////////////
   unsigned long connectTime = millis();
   while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED)
@@ -91,22 +96,12 @@ void networkSetup() {
   } //if
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
-  //allows serving of files from SPIFFS
-  SPIFFS.begin();
 
   server.onNotFound([]() {
     if (!handleFileRead(server.uri())) server.send(302, "text/html", metaRefreshStr);
   }); //server.onNotFound
 
-  //run a scan for wifi networks on setup
-  scannedNetworks = WiFi.scanNetworks();
-
-  server.on("/wifi/rescan", []() {
-    scannedNetworks = WiFi.scanNetworks();
-    server.send(200, "text/html", "");
-  });
-
-  server.on("/wf", [] () {
+  server.on("/wifi/list", [] () {
     int n = WiFi.scanNetworks();
     int ix[n];
     for (int i = 0; i < n; i++) ix[i] = i;
@@ -118,15 +113,17 @@ void networkSetup() {
       }//for j
     }//for i
 
-    String s="";
+    String s = "";
     for (int i = 0; i < n; i++) {
       if (ix[i] != -1) {
-        s+=String("\n")+((constrain(WiFi.RSSI(ix[i]), -100, -50) + 100) * 2) + ":" + ((WiFi.encryptionType(ix[i]) == ENC_TYPE_NONE)?0:1) + ":" + WiFi.SSID(ix[i]);
+        s += String("\n") + ((constrain(WiFi.RSSI(ix[i]), -100, -50) + 100) * 2)
+             + ":" + ((WiFi.encryptionType(ix[i]) == ENC_TYPE_NONE) ? 0 : 1)
+             + ":" + WiFi.SSID(ix[i]);
       }
     }
 
     server.send(200, "text/plain", s);
-  });
+  }); //server.on /wifi/list
 
   server.on("/wifi/wps", []() {
     server.send(200, "text/html", "WPS");
@@ -137,14 +134,7 @@ void networkSetup() {
   }); //server.on /wifi/wps
 
   server.on("/wifi/connect", []() {
-    if (server.hasArg("ssid") || server.hasArg("n"))
-    { //connects to specified wifi network, then reboots
-      WiFi.mode(WIFI_STA);
-      String ssid = server.hasArg("n") ? WiFi.SSID(server.arg("n").toInt()) : server.arg("ssid");
-      (server.hasArg("encrypted") && server.arg("encrypted").equals("true")) ? WiFi.begin(ssid.c_str(), server.arg("pw").c_str()) : WiFi.begin(ssid.c_str());
-      delay(100);
-      ESP.restart();
-    } //if
+    networkSetup(server.arg("n"), server.arg("p"));
   }); //server.on /wifi/connect
 
   //handles commands from webpage, sends live data in JSON format
@@ -201,6 +191,8 @@ void setup() {
   Serial.begin(115200); //for terminal debugging
   Serial.println();
 
+  //allows serving of files from SPIFFS
+  SPIFFS.begin();
 
   //set up temperature sensors and relay output
   temperatureSensors.begin();
@@ -209,7 +201,8 @@ void setup() {
   myPID.setTimeStep(4000);
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, HIGH);
-  networkSetup();
+
+  networkSetup("", "");
 
   server.begin();
   Serial.println("setup complete.");
