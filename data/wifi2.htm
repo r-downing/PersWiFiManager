@@ -3,31 +3,30 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-	<title>Config ESP</title>
+	<title>ESP WiFi</title>
 	<script>
-
-		function c(l) { document.getElementById('s').value = l.innerText || l.textContent; document.getElementById('p').focus(); }
+		function g(i) { return document.getElementById(i); };
+		function c(l) { g('s').value = l.innerText || l.textContent; g('p').focus(); };
 		function scan() {
-			var xhttp = new XMLHttpRequest(), wl = document.getElementById('wl');
+			var xhttp = new XMLHttpRequest(), wl = g('wl');
 			wl.innerHTML = "Scanning...";
 			xhttp.onreadystatechange = function () {
 				if (this.readyState == 4 && this.status == 200) {
 					wl.innerHTML = "";
-					this.responseText.split("\n").forEach(function (e) {
+					this.responseText.split("\n").forEach(function (e, i) {
 						var t = e.split(":");
 						var s = t.shift();
 						var c = parseInt(t.shift());
 						var n = t.join(":");
-						if (e.length) wl.innerHTML += ("<div><a href='#p' onclick='c(this)'>" + n
-							+ "</a>&nbsp;<span class='q "
-							+ "'>" + s + "%" + (c ? "\uD83D\uDD12" : "\u26A0") + "</span></div>");
+						wl.innerHTML += ("<div><a id='" + i + "' onclick='c(this)'></a>&nbsp;<a class='q'>"
+							+ s + "%" + (c ? "\uD83D\uDD12" : "\u26A0") + "</a></div>");
+						g(i).appendChild(document.createTextNode(n));
 					});
 				}
 			};
 			xhttp.open("GET", "wifi/list", true);
 			xhttp.send();
 		};
-
 
 	</script>
 	<style>
@@ -54,12 +53,11 @@
 			line-height: 2.4rem;
 			font-size: 1.2rem;
 			width: 100%;
-			display:block;
+			display: block;
 		}
 
 		.q {
 			float: right;
-			width: 64px;
 			text-align: right;
 		}
 	</style>
@@ -80,8 +78,11 @@
 			<br>
 			<button type='submit'>Connect</button>
 		</form>
-		<br><br>
+		<br>
+		<br>
 		<button onclick="if(confirm('Start WPS Setup?')) window.location='#aaa'">WPS Setup</button>
+		<br>
+		<a href="javascript:history.back()">Back</a>
 	</div>
 </body>
 
