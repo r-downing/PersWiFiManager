@@ -1,74 +1,89 @@
 <!DOCTYPE html>
-<html ng-app="wifi">
+<html lang="en">
 
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Sous Vide Control</title>
-	<!-- <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>	
-	<script> window.jQuery || document.write('<script src="jquery-3.2.1.min.js">\x3C/script>') </script>
-	<script> window.angular || document.write('<script src="angular.min.js">\x3C/script>') </script> -->
-	<script src="jquery-3.2.1.min.js"></script>
-	<script src="angular.min.js"></script>
-	<script type="text/javascript">
-		setTimeout(function(){
-			if(!window.jQuery || !window.angular) location.reload();
-		},10000);
-	</script>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<title>ESP WiFi</title>
 	<script>
-		var wifi = angular.module('wifi', []);
-		wifi.controller('mainController', function ($scope, $http, $window) {
-
-			$scope.setSel = function (n) {
-			$scope.sel = n;
+		function g(i) { return document.getElementById(i); };
+		function c(l) { g('s').value = l.innerText || l.textContent; g('p').focus(); };
+		function scan() {
+			var xhttp = new XMLHttpRequest(), wl = g('wl');
+			wl.innerHTML = "Scanning...";
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					wl.innerHTML = "";
+					this.responseText.split("\n").forEach(function (e, i) {
+						var t = e.split(":");
+						var s = t.shift();
+						var c = parseInt(t.shift());
+						var n = t.join(":");
+						wl.innerHTML += ("<div><a id='" + i + "' onclick='c(this)'></a>&nbsp;<a class='q'>"
+							+ s + "%" + (c ? "\uD83D\uDD12" : "\u26A0") + "</a></div>");
+						g(i).appendChild(document.createTextNode(n));
+					});
+				}
 			};
-
-			$scope.connect = function (n) {
-				if(!n.encrypted && !$window.confirm("Unsecure network. Are you sure?")) return;
-				$http.post('/wifi/connect', $.param(n));
-			}
-
-			$scope.wps = function () {
-				if ($window.confirm("Start WPS Setup?")) $http.get('/wifi/wps');
-			}
-
-			$http.get('/wf').then(function (res) {
-				console.log(res.data);
-				$scope.data=[];
-				res.data.split("\n").forEach(function(e){
-					var t=e.split(":");
-					if(e.length) $scope.data.push({s:t.shift(),e:t.shift(),n:t.join(":")});
-				});
-			});
-		}); //wifi
+			xhttp.open("GET", "wifi/list", true);
+			xhttp.send();
+		};
 
 	</script>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<style>
+		div,
+		input {
+			padding: 5px;
+			font-size: 1em;
+		}
+
+		input {
+			width: 95%;
+		}
+
+		body {
+			text-align: center;
+			font-family: verdana;
+		}
+
+		button {
+			border: 0;
+			border-radius: 0.3rem;
+			background-color: #1fa3ec;
+			color: #fff;
+			line-height: 2.4rem;
+			font-size: 1.2rem;
+			width: 100%;
+			display: block;
+		}
+
+		.q {
+			float: right;
+			text-align: right;
+		}
+	</style>
 </head>
 
-<body ng-controller="mainController">
-	WiFi Status:
-	<br>
-	<span class="smalltext">{{status.connected?("Connected to "+status.connected):"Not connected"}}</span>
-	<br>
-	<span class="smalltext">Changing WiFi settings will reboot the device. </span>
-	<br> Available networks:
-	<br>
-	<div ng-repeat="nw in data" class="rbutton" ng-click="setSel(nw)" style="{{sel==nw?('background-color:orange'):''}}">
-	 	{{nw.n}} <span style="float:right">{{nw.s}}%</span>
-		<span ng-if="sel==nw && nw.e">
+<body>
+	<div style='text-align:left;display:inline-block;min-width:260px;'>
+		<button onclick="scan()">Scan</button>
+		<br>
+		<span id='wl'></span>
+		<br>
+		<form method='post' action='/wifi/connect'>
+			<input id='s' name='n' length=32 placeholder='SSID'>
 			<br>
-			<input placeholder="password" ng-model="nw.p" type="password" />
-		</span>
-		<span ng-if="sel==nw && nw.n.length && (!nw.e || nw.p.length)">
+			<input id='p' name='p' length=64 type='password' placeholder='password'>
 			<br>
-			<button ng-click="connect(nw)">Connect</button>
-		</span> 
+			<br>
+			<br>
+			<button type='submit'>Connect</button>
+		</form>
+		<br>
+		<br>
+		<button onclick="if(confirm('Start WPS Setup?')) window.location='#aaa'">WPS Setup</button>
+		<br>
+		<a href="javascript:history.back()">Back</a> | <a href="/">Home</a>
 	</div>
-	<div class="rbutton" ng-click="wps()">WPS Setup...</div>
-	<br>
-	<br>
-	<ng-include src="'nav.htm'"></ng-include>
-
 </body>
+
 </html>

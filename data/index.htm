@@ -4,8 +4,10 @@
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Sous Vide Control</title>
-	<script src="core.js"></script>
 	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="/jquery-3.2.1.min.js"></script>
+	<script src="/angular.min.js"></script>
+	<script src="core.js"></script>		
 </head>
 
 <body ng-controller="mainController">
@@ -30,11 +32,13 @@
 		</span>
 		<br>
 		<br>
-		<ng-include src="'nav.htm'"></ng-include>
+		<span id="nav">
+				<a href="/">Home</a> | 
+				<a href="graph.htm">Graph</a> | 
+				<a href="recipes.htm">Recipes</a> | 
+				<a href="wifi.htm">WiFi Setup</a>
+		</span>
 	</div>
-	
-	<script src="/jquery-3.2.1.min.js"></script>
-	<script src="/angular.min.js"></script>
 </body>
 
 </html>
