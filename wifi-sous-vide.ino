@@ -86,7 +86,8 @@ void networkSetup(String ssid, String pass) {
   }
   Serial.println("WiFi.begin"); /////////////////////////////////////////////////
   unsigned long connectTime = millis();
-  while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED)
+  //while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED)
+  while (WiFi.status() != WL_CONNECT_FAILED && WiFi.status() != WL_CONNECTED)
     delay(10);
   if (WiFi.status() != WL_CONNECTED) { //if timed out, switch to AP mode
     Serial.println("WIFI_AP"); ////////////////////////////////////////////////////
@@ -102,26 +103,30 @@ void networkSetup(String ssid, String pass) {
   }); //server.onNotFound
 
   server.on("/wifi/list", [] () {
+    //scan for wifi networks
     int n = WiFi.scanNetworks();
+    
+    //build array of indices
     int ix[n];
     for (int i = 0; i < n; i++) ix[i] = i;
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < i; j++) {
-        if (i == -1 || j == -1) continue;
-        if (WiFi.RSSI(ix[i]) > WiFi.RSSI(ix[j])) std::swap(ix[i], ix[j]); //swap (bubble sort by signal)
-        if (WiFi.SSID(ix[i]).equals(WiFi.SSID(ix[j]))) ix[j] = -1; //mark duplicates for skipping
-      }//for j
-    }//for i
-
+    
+    //sort by signal strength
+    for (int i = 0; i < n; i++) for (int j = 1; j < n - i; j++) if (WiFi.RSSI(ix[j]) > WiFi.RSSI(ix[j - 1])) std::swap(ix[j], ix[j - 1]);
+    //remove duplicates
+    for (int i = 0; i < n; i++) for (int j = i + 1; j < n; j++) if (WiFi.SSID(ix[i]).equals(WiFi.SSID(ix[j]))) ix[j] = -1;
+    
+    //build plain text string of wifi info
+    //format [signal%]:[encrypted 0 or 1]:SSID
     String s = "";
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n && s.length() < 2000; i++) { //check s.length to limit memory usage
       if (ix[i] != -1) {
-        s += String("\n") + ((constrain(WiFi.RSSI(ix[i]), -100, -50) + 100) * 2)
+        s += String(i?"\n":"") + ((constrain(WiFi.RSSI(ix[i]), -100, -50) + 100) * 2)
              + ":" + ((WiFi.encryptionType(ix[i]) == ENC_TYPE_NONE) ? 0 : 1)
              + ":" + WiFi.SSID(ix[i]);
       }
     }
 
+    //send string to client
     server.send(200, "text/plain", s);
   }); //server.on /wifi/list
 
@@ -134,6 +139,7 @@ void networkSetup(String ssid, String pass) {
   }); //server.on /wifi/wps
 
   server.on("/wifi/connect", []() {
+    server.send(200, "text/html", "attempting to connect...");
     networkSetup(server.arg("n"), server.arg("p"));
   }); //server.on /wifi/connect
 
