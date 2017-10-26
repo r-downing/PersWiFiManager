@@ -87,7 +87,7 @@ void networkSetup(String ssid, String pass) {
   Serial.println("WiFi.begin"); /////////////////////////////////////////////////
   unsigned long connectTime = millis();
   //while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED)
-  while (WiFi.status() != WL_CONNECT_FAILED && WiFi.status() != WL_CONNECTED)
+  while (WiFi.status() != WL_CONNECT_FAILED && WiFi.status() != WL_CONNECTED && (millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT)
     delay(10);
   if (WiFi.status() != WL_CONNECTED) { //if timed out, switch to AP mode
     Serial.println("WIFI_AP"); ////////////////////////////////////////////////////
@@ -131,11 +131,13 @@ void networkSetup(String ssid, String pass) {
   }); //server.on /wifi/list
 
   server.on("/wifi/wps", []() {
-    server.send(200, "text/html", "WPS");
+    server.send(200, "text/html", "attempting WPS");
     WiFi.mode(WIFI_STA);
     WiFi.beginWPSConfig();
     delay(100);
-    ESP.restart();
+    if(WiFi.status() != WL_CONNECTED) {
+      networkSetup("","");
+    }
   }); //server.on /wifi/wps
 
   server.on("/wifi/connect", []() {
