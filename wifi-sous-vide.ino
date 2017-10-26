@@ -5,7 +5,6 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
-#include <ESP8266mDNS.h>
 #include <FS.h>
 #define WIFI_CONNECT_TIMEOUT 30
 
@@ -98,10 +97,6 @@ void networkSetup(String ssid, String pass) {
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start((byte)53, "*", apIP); //used for captive portal in AP mode
 
-  server.onNotFound([]() {
-    if (!handleFileRead(server.uri())) server.send(302, "text/html", metaRefreshStr);
-  }); //server.onNotFound
-
   server.on("/wifi/list", [] () {
     //scan for wifi networks
     int n = WiFi.scanNetworks();
@@ -144,6 +139,30 @@ void networkSetup(String ssid, String pass) {
     server.send(200, "text/html", "attempting to connect...");
     networkSetup(server.arg("n"), server.arg("p"));
   }); //server.on /wifi/connect
+
+} //void networkSetup
+
+void setup() {
+  Serial.begin(115200); //for terminal debugging
+  Serial.println();
+
+  //allows serving of files from SPIFFS
+  SPIFFS.begin();
+
+  //set up temperature sensors and relay output
+  temperatureSensors.begin();
+  temperatureSensors.requestTemperatures();
+  myPID.setBangBang(4);
+  myPID.setTimeStep(4000);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH);
+
+  networkSetup("", "");
+
+  //serve files from SPIFFS
+  server.onNotFound([]() {
+    if (!handleFileRead(server.uri())) server.send(302, "text/html", metaRefreshStr);
+  }); //server.onNotFound
 
   //handles commands from webpage, sends live data in JSON format
   server.on("/io", []() {
@@ -190,27 +209,6 @@ void networkSetup(String ssid, String pass) {
   SSDP.setURL("/");
   SSDP.begin();
   SSDP.setDeviceType("upnp:rootdevice");
-
-  MDNS.begin("sousvide");
-  MDNS.addService("http", "tcp", 80);
-} //void networkSetup
-
-void setup() {
-  Serial.begin(115200); //for terminal debugging
-  Serial.println();
-
-  //allows serving of files from SPIFFS
-  SPIFFS.begin();
-
-  //set up temperature sensors and relay output
-  temperatureSensors.begin();
-  temperatureSensors.requestTemperatures();
-  myPID.setBangBang(4);
-  myPID.setTimeStep(4000);
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, HIGH);
-
-  networkSetup("", "");
 
   server.begin();
   Serial.println("setup complete.");
