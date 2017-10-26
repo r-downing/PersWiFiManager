@@ -21,7 +21,7 @@
 						var s = t.shift();
 						var c = parseInt(t.shift());
 						var n = t.join(":");
-						wl.innerHTML += ("<div><a id='" + i + "' onclick='c(this)'></a>&nbsp;<a class='q'>"
+						wl.innerHTML += ("<div><a id='" + i + "' onclick='c(this)'></a> <a class='q'>"
 							+ s + "%" + (c ? "\uD83D\uDD12" : "\u26A0") + "</a></div>");
 						g(i).appendChild(document.createTextNode(n));
 					});
@@ -46,7 +46,10 @@
 		body {
 			text-align: center;
 			font-family: verdana;
+			background-color:black;
+			color:white;
 		}
+		a {color:#1fa3ec}
 
 		button {
 			border: 0;
@@ -61,13 +64,12 @@
 
 		.q {
 			float: right;
-			text-align: right;
 		}
 	</style>
 </head>
 
 <body>
-	<div style='text-align:left;display:inline-block;min-width:260px;'>
+	<div style='text-align:left;display:inline-block;min-width:320px;'>
 		<button onclick="scan()">Scan</button>
 		<br>
 		<span id='wl'></span>
@@ -83,7 +85,7 @@
 		</form>
 		<br>
 		<br>
-		<button onclick="if(confirm('Start WPS Setup?')) window.location='#aaa'">WPS Setup</button>
+		<button onclick="if(confirm('Press WPS button on router')) window.location='/wifi/wps'">WPS Setup</button>
 		<br>
 		<a href="javascript:history.back()">Back</a> | <a href="/">Home</a>
 	</div>
