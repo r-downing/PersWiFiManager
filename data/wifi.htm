@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 	<title>ESP WiFi</title>
 	<script>
 		function g(i) { return document.getElementById(i); };
 		function c(l) { g('s').value = l.innerText || l.textContent; g('p').focus(); };
+		function p(t,l){if(confirm(t))window.location=l;};
 		var xh;
 		function scan() {
-			if(xh) return;
+			if (xh) return;
 			xh = new XMLHttpRequest(), wl = g('wl');
 			wl.innerHTML = "Scanning...";
 			xh.onreadystatechange = function () {
 				if (this.readyState == 4 && this.status == 200) {
-					xh=0;
+					xh = 0;
 					wl.innerHTML = "";
 					this.responseText.split("\n").forEach(function (e, i) {
 						var t = e.split(":");
 						var s = t.shift();
 						var c = parseInt(t.shift());
 						var n = t.join(":");
-						wl.innerHTML += ("<div><a id='" + i + "' onclick='c(this)'></a> <a class='q'>"
+						wl.innerHTML += ("<div><a class='s' id='" + i + "' onclick='c(this)'></a> <a class='q'>"
 							+ s + "%" + (c ? "\uD83D\uDD12" : "\u26A0") + "</a></div>");
 						g(i).appendChild(document.createTextNode(n));
 					});
@@ -30,7 +30,6 @@
 			xh.open("GET", "wifi/list", true);
 			xh.send();
 		};
-
 	</script>
 	<style>
 		div,
@@ -46,24 +45,35 @@
 		body {
 			text-align: center;
 			font-family: verdana;
-			background-color:black;
-			color:white;
+			background-color: black;
+			color: white;
 		}
-		a {color:#1fa3ec}
+
+		a {
+			color: #1fa3ec
+		}
 
 		button {
 			border: 0;
-			border-radius: 0.3rem;
+			border-radius: 0.3em;
 			background-color: #1fa3ec;
 			color: #fff;
-			line-height: 2.4rem;
-			font-size: 1.2rem;
+			line-height: 2.4em;
+			font-size: 1.2em;
 			width: 100%;
 			display: block;
 		}
 
 		.q {
 			float: right;
+		}
+
+		.s {
+			display: inline-block;
+			white-space: nowrap; 
+			width: 14em; 
+			overflow: hidden;
+			text-overflow: ellipsis; 
 		}
 	</style>
 </head>
@@ -80,14 +90,16 @@
 			<input id='p' name='p' length=64 type='password' placeholder='password'>
 			<br>
 			<br>
-			<br>
 			<button type='submit'>Connect</button>
 		</form>
 		<br>
 		<br>
-		<button onclick="if(confirm('Press WPS button on router')) window.location='/wifi/wps'">WPS Setup</button>
+		<button onclick="p('Start WPS?','/wifi/wps')">WPS Setup</button>
 		<br>
-		<a href="javascript:history.back()">Back</a> | <a href="/">Home</a>
+		<button onclick="p('Reboot device?','/wifi/rst')">Reboot</button>
+		<br>
+		<a href="javascript:history.back()">Back</a> |
+		<a href="/">Home</a>
 	</div>
 </body>
 
