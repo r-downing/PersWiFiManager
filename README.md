@@ -1,4 +1,4 @@
-# PersistentWiFiManager
+# PersWiFiManager
 Persistent WiFiManager Arduino library for ESP8266
 
 
