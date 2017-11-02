@@ -1,3 +1,7 @@
+/* PersWiFiManager
+ * version 1.0.1
+ * https://r-downing.github.io/PersWiFiManager/
+ */
 #include "PersWiFiManager.h"
 
 //uncomment next line to serve wifi settings page from progmem instead of SPIFFS (uses ~2kb)
