@@ -38,9 +38,27 @@ The library can be installed and included like a normal Arduino library. The *wi
 
 `#define WIFI_HTM_PROGMEM`
 
-Since the captive DNS server redirects to the root page, the user should make sure their index page or *"/"* handler provides a link to *"/wifi.htm"*
 
-Another option is to have a custom user interface that can make use of the same *"/wifi/..."* server handlers.
+The PersWiFiManager object should be declared in the same scope as the servers, which are passed as arguements in the constructor.
+
+```cpp
+ESP8266WebServer server(80);
+DNSServer dnsServer;
+PersWiFiManager persWM(server, dnsServer);
+```
+
+Then in setup, the `begin()` function should be called.
+```cpp
+void setup() {
+
+  SPIFFS.begin();
+  persWM.begin();
+  ...
+```
+
+Since the captive DNS server redirects to the root page, the user should make sure their index page or `"/"` handler provides a link to `"/wifi.htm"`
+
+Another option is to have a custom user interface that can make use of the same `"/wifi/..."` server handlers.
 
 
 
