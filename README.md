@@ -1,5 +1,5 @@
 # PersWiFiManager
-Persistent WiFiManager Arduino library for ESP8266
+Persistent WiFiManager Arduino library for ESP8266-based microcontrollers
 
 - [PersWiFiManager](#perswifimanager)
 - [About](#about)
