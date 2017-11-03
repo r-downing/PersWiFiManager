@@ -9,6 +9,10 @@ Persistent WiFiManager Arduino library for ESP8266-based microcontrollers
 		- [WiFi Scan Function](#wifi-scan-function)
 		- [WPS Setup](#wps-setup)
 	- [How to Use](#how-to-use)
+- [Installation](#installation)
+	- [Via Arduino IDE Library Manager](#via-arduino-ide-library-manager)
+	- [Via ZIP File](#via-zip-file)
+- [To Do](#to-do)
 
 # About
 
@@ -59,6 +63,21 @@ void setup() {
 Since the captive DNS server redirects to the root page, the user should make sure their index page or `"/"` handler provides a link to `"/wifi.htm"`
 
 Another option is to have a custom user interface that can make use of the same `"/wifi/..."` server handlers.
+
+# Installation
+## Via Arduino IDE Library Manager
+Coming soon...
+
+## Via ZIP File
+[Download zip file](https://github.com/r-downing/PersWiFiManager/archive/master.zip) and extract to *Arduino/libraries* folder
+
+
+# To Do
+- [] get in library manager
+- [] AP mode encryption option
+- [] static IP option
+- [] Finish doc page
+- [] Examples
 
 
 
