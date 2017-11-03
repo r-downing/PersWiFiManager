@@ -73,11 +73,11 @@ Coming soon...
 
 
 # To Do
-- [] get in library manager
-- [] AP mode encryption option
-- [] static IP option
-- [] Finish doc page
-- [] Examples
+- [ ] get in library manager
+- [ ] AP mode encryption option
+- [ ] static IP option
+- [ ] Finish doc page
+- [ ] Examples
 
 
 
