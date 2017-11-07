@@ -12,6 +12,8 @@ Persistent WiFiManager Arduino library for ESP8266-based microcontrollers
 - [Installation](#installation)
 	- [Via Arduino IDE Library Manager](#via-arduino-ide-library-manager)
 	- [Via ZIP File](#via-zip-file)
+- [Examples](#examples)
+	- [Basic REST API](#basic-rest-api)
 - [To Do](#to-do)
 
 # About
@@ -71,6 +73,50 @@ Coming soon...
 ## Via ZIP File
 [Download zip file](https://github.com/r-downing/PersWiFiManager/archive/master.zip) and extract to *Arduino/libraries* folder
 
+# Examples
+## Basic REST API
+
+[Full example code](https://github.com/r-downing/PersWiFiManager/tree/master/examples/basic_rest_api)
+
+This is a simple, fully-funcioning REST API example that uses the PersWiFiManager to setup and handle the wifi connection.
+
+All that is needed is to create a PersWiFiObject and pass webserver + dnsServer as arguments
+
+```cpp
+
+//includes
+#include <PersWiFiManager.h>
+#include <ArduinoJson.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266SSDP.h>
+#include <ESP8266WebServer.h>
+#include <DNSServer.h>
+#include <FS.h>
+
+....
+
+//server objects
+ESP8266WebServer server(80);
+DNSServer dnsServer;
+PersWiFiManager persWM(server, dnsServer);
+
+```
+
+Then in setup, call `PersWiFiManager::begin()`
+
+```cpp
+void setup() {
+  ...
+
+  //allows serving of files from SPIFFS
+  SPIFFS.begin();
+  persWM.begin();
+```
+
+The program tries to connect to wifi, then the REST API just works, with or without local wifi. You can switch wifi networks at any time.
+
+### Screenshot
+![](https://i.imgur.com/RScftNg.png)
 
 # To Do
 - [ ] get in library manager
