@@ -26,7 +26,7 @@ This library and UI was inspired by tzapu's [WiFiManager library](https://github
 
 When creating an instance of a PersWiFiManager object, it takes arguments of an already-declared ESP8266WiFiManager and DNSServer, and attaches the wifi settings handlers to them. This way, they can continue to be used in the main program.
 
-The WiFi setup page is static and served from SPIFFS (or PROGMEM). It has a form for manual SSID/password input. If the user wants to scan for WiFi networks, it makes a request to the server, which sends a CSV-style list of available WiFi networks (sorted by signal, with duplicates removed). The page uses javascript to parse the list and display it. The interface also has aWPS setup button, and a Reboot button.
+The WiFi setup page is static and served from SPIFFS (or PROGMEM). It has a form for manual SSID/password input. If the user wants to scan for WiFi networks, it makes a request to the server, which responds with a CSV-style list of available WiFi networks (sorted by signal, with duplicates removed). I chose CSV over JSON because, even with the ArduinoJSON library or proper manual escaping, I still encountered a few wireless networks with bad characters that would invalidate the entire json string. The page uses javascript to parse the list and display it. The interface also has a WPS setup button, and a Reboot button.
 
 ## Screenshots
 ### Main WiFi Setup Page
