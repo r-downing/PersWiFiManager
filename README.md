@@ -135,7 +135,7 @@ The program tries to connect to wifi, then the REST API just works, with or with
 
 # To Do
 - [ ] get in library manager
-- [ ] AP mode encryption option
+- [x] AP mode encryption option (in ap-credentials branch)
 - [ ] static IP option
 - [ ] Finish doc page
 - [ ] Examples
