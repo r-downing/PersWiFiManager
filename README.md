@@ -93,7 +93,8 @@ Another option is to have a custom user interface that can make use of the same 
 
 # Installation
 ## Via Arduino IDE Library Manager
-Coming soon...
+**Sketch** -> **Include Library** -> **Manage Libraries...** -> search for "PersWiFiManager"
+![Arduino Library Manager screen](https://i.imgur.com/IdLr2VV.png)
 
 ## Via ZIP File
 [Download zip file](https://github.com/r-downing/PersWiFiManager/archive/master.zip) and extract to *Arduino/libraries* folder
@@ -202,7 +203,6 @@ The program tries to connect to wifi, then the REST API just works, with or with
 ![](https://i.imgur.com/RScftNg.png)
 
 # To Do
-- [ ] get in library manager
 - [ ] static IP option
 
 
