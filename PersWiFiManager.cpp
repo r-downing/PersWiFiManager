@@ -1,3 +1,8 @@
+/* PersWiFiManager
+ * version 2.0.0
+ * https://r-downing.github.io/PersWiFiManager/
+ */
+
 #include "PersWiFiManager.h"
 
 #ifdef WIFI_HTM_PROGMEM
