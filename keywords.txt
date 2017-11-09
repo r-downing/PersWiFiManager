@@ -13,8 +13,10 @@ PersWiFiManager	KEYWORD1
 #######################################
 
 attemptConnection	KEYWORD2
-attemptConnection	KEYWORD2
+setupWiFiHandlers	KEYWORD2
 begin	KEYWORD2
+getApSsid	KEYWORD2
+setApCredentials	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
