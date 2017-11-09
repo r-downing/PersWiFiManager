@@ -4,6 +4,7 @@ Persistent WiFiManager Arduino library for ESP8266-based microcontrollers
 - [PersWiFiManager](#perswifimanager)
 - [About](#about)
 	- [How it Works](#how-it-works)
+		- [Example '/wifi/list' output](#example-wifilist-output)
 	- [Screenshots](#screenshots)
 		- [Main WiFi Setup Page](#main-wifi-setup-page)
 		- [WiFi Scan Function](#wifi-scan-function)
@@ -12,8 +13,17 @@ Persistent WiFiManager Arduino library for ESP8266-based microcontrollers
 - [Installation](#installation)
 	- [Via Arduino IDE Library Manager](#via-arduino-ide-library-manager)
 	- [Via ZIP File](#via-zip-file)
+- [Documentation](#documentation)
+	- [PersWiFiManager Functions](#perswifimanager-functions)
+		- [PersWiFiManager::PersWiFiManager](#perswifimanagerperswifimanager)
+		- [PersWiFiManager::attemptConnection](#perswifimanagerattemptconnection)
+		- [PersWiFiManager::setupWiFiHandlers](#perswifimanagersetupwifihandlers)
+		- [PersWiFiManager::begin](#perswifimanagerbegin)
+		- [PersWiFiManager::getApSsid](#perswifimanagergetapssid)
+		- [PersWiFiManager::setApCredentials](#perswifimanagersetapcredentials)
 - [Examples](#examples)
 	- [Basic REST API](#basic-rest-api)
+		- [Screenshot](#screenshot)
 - [To Do](#to-do)
 
 # About
@@ -88,6 +98,52 @@ Coming soon...
 ## Via ZIP File
 [Download zip file](https://github.com/r-downing/PersWiFiManager/archive/master.zip) and extract to *Arduino/libraries* folder
 
+# Documentation
+## PersWiFiManager Functions
+
+### PersWiFiManager::PersWiFiManager
+> Creates a new PersWiFiManager object
+```cpp
+PersWiFiManager(ESP8266WebServer& s, DNSServer& d)
+```
+- `s` and `d` are the existing web server and dns server object, passed by reference
+
+### PersWiFiManager::attemptConnection
+> Attempts to connect to wifi. This is already called in `begin`, but this function can be used as a delayed alternative with `setupWiFiHandlers`
+```cpp
+bool attemptConnection(const String& ssid = "", const String& pass = "")
+```
+- `ssid` and `pass` are optional arguments, the desired network and password to connect to
+
+### PersWiFiManager::setupWiFiHandlers
+> Sets up built-in wifi command handlers. This is already called in `begin`, but this can be used as a delayed alternative, calling `setupWiFiHandlers` at a later time
+```cpp
+void setupWiFiHandlers()
+```
+
+### PersWiFiManager::begin
+> Begins WiFi Manager operation. Sets up handlers and attempts auto-connection, switches to AP mode if unsuccessful
+```cpp
+bool begin(const String& ssid = "", const String& pass = "")
+```
+- `ssid` and `pass` are optional arguments, the desired network and password to connect to first
+- `return` true if autoconnected, false if switched to AP mode
+
+### PersWiFiManager::getApSsid
+> Get AP mode SSID
+```cpp
+String getApSsid()
+```
+- `return` the AP ssid, either automatically set, or overridden in `setApCredentials`
+
+### PersWiFiManager::setApCredentials
+> Sets AP mode credentials to be used if wifi can't connect. Should be called before `begin`
+```cpp
+void setApCredentials(const String& apSsid, const String& apPass = "")
+```
+- `apSsid` and (optional) `apPass` are the network credentials for AP mode
+
+
 # Examples
 ## Basic REST API
 
@@ -125,7 +181,19 @@ void setup() {
 
   //allows serving of files from SPIFFS
   SPIFFS.begin();
+
+  //optional set credentials for AP mode if wifi connect fails
+  persWM.setApCredentials("WIFI SETUP"); 
+  //persWM.setApCredentials("WIFI SETUP", "PASSWORD");
+
+  //begin autoconnect
   persWM.begin();
+
+  //or try a specific network first
+  //persWM.begin("mynetwork"); //open
+  //persWM.begin("mynetwork", "mypassword"); //encrypted
+
+  //program then proceeds from this point, with or without wifi
 ```
 
 The program tries to connect to wifi, then the REST API just works, with or without local wifi. You can switch wifi networks at any time.
