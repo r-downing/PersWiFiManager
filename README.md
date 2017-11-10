@@ -205,6 +205,9 @@ The program tries to connect to wifi, then the REST API just works, with or with
 # To Do
 - [ ] static IP option
 
+----
+
+[Home](http://ryandowning.net)
 
 
 
