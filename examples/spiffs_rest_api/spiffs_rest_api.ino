@@ -16,6 +16,8 @@
 
 //extension of ESP8266WebServer with SPIFFS handlers built in
 #include <SPIFFSReadServer.h> // https://github.com/r-downing/SPIFFSReadServer
+// upload data folder to chip with Arduino ESP8266 filesystem uploader
+// https://github.com/esp8266/arduino-esp8266fs-plugin
 
 #include <DNSServer.h>
 #include <FS.h>
