@@ -40,6 +40,9 @@ void setup() {
 
   //allows serving of files from SPIFFS
   SPIFFS.begin();
+  //sets network name for AP mode
+  persWM.setApCredentials(DEVICE_NAME);
+  //persWM.setApCredentials(DEVICE_NAME, "password"); optional password
   persWM.begin();
 
   //handles commands from webpage, sends live data in JSON format
