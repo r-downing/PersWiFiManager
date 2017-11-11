@@ -19,7 +19,8 @@
 
 #define DEVICE_NAME "ESP8266 DEVICE"
 
-const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"1; url=/\" /></head><body><a href=\"/\">redirecting...</a></body>";
+//const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"1; url=/\" /></head><body><a href=\"/\">redirecting...</a></body>";
+const char *metaRefreshStr = "<script>window.location='/'</script><a href='/'>redirecting...</a>";
 
 //server objects
 ESP8266WebServer server(80);
