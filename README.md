@@ -206,6 +206,8 @@ The program tries to connect to wifi, then the REST API just works, with or with
 
 # To Do
 - [ ] static IP option
+- [ ] non-blocking connection/reconnection
+	- This may require a continuously called function (something like *handleWiFi*) which would be a little bit of a fundamental change, so to preserve compatibility/simplicity, I may want to make this feature optional (default turned off)
 
 ----
 
