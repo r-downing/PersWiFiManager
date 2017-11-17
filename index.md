@@ -32,6 +32,8 @@ This Persistent WiFi Manager provides a WiFi Settings web interface for ESP8266-
 
 This library and UI was inspired by tzapu's [WiFiManager library](https://github.com/tzapu/WiFiManager). The main difference is that it allows the program to continue functioning normally, even in AP mode. It is also more memory efficient, as it does not have to dynamically build the page, and can serve it from SPIFFS rather than PROGMEM. 
 
+For a quick and easy way to serve from SPIFFS, check out my [SPIFFSReadServer library.](http://ryandowning.net/SPIFFSReadServer)
+
 ## How it Works
 
 When creating an instance of a PersWiFiManager object, it takes arguments of an already-declared ESP8266WiFiManager and DNSServer, and attaches the wifi settings handlers to them. This way, they can continue to be used in the main program.
@@ -55,13 +57,13 @@ Commas in the SSID are ok; the javascript in the wifi.htm page splits the lines 
 
 ## Screenshots
 ### Main WiFi Setup Page
-<img src="https://i.imgur.com/aLT68mU.png" width="300">
+<img src="img/ui-main.png" width="300">
 
 ### WiFi Scan Function
-<img src="https://i.imgur.com/IzY25Gr.png" width="300">
+<img src="img/ui-scan.png" width="300">
 
 ### WPS Setup
-<img src="https://i.imgur.com/1mwIEXD.png" width="300">
+<img src="img/ui-wps.png" width="300">
 
 ## How to Use
 
@@ -96,7 +98,7 @@ Another option is to have a custom user interface that can make use of the same 
 # Installation
 ## Via Arduino IDE Library Manager
 **Sketch** -> **Include Library** -> **Manage Libraries...** -> search for "PersWiFiManager"
-![Arduino Library Manager screen](https://i.imgur.com/IdLr2VV.png)
+![Arduino Library Manager screen](img/libman.png)
 
 ## Via ZIP File
 [Download zip file](https://github.com/r-downing/PersWiFiManager/archive/master.zip) and extract to *Arduino/libraries* folder
@@ -202,7 +204,7 @@ void setup() {
 The program tries to connect to wifi, then the REST API just works, with or without local wifi. You can switch wifi networks at any time.
 
 ### Screenshot
-![](https://i.imgur.com/RScftNg.png)
+![](img/example-screenshot.png)
 
 # To Do
 - [ ] static IP option
