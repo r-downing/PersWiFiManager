@@ -1,7 +1,7 @@
 /* PersWiFiManager
- * version 2.0.2
- * https://r-downing.github.io/PersWiFiManager/
- */
+   version 2.0.2 - nonblock mod
+   https://r-downing.github.io/PersWiFiManager/
+*/
 
 #include "PersWiFiManager.h"
 
@@ -16,11 +16,6 @@ PersWiFiManager::PersWiFiManager(ESP8266WebServer& s, DNSServer& d) {
 } //PersWiFiManager
 
 bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) {
-  IPAddress apIP(192, 168, 1, 1);
-  //moved dns start to here
-  _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
-  _dnsServer->start((byte)53, "*", apIP); //used for captive portal in AP mode
-
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   if (ssid.length()) {
@@ -29,19 +24,49 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
   } else {
     WiFi.begin();
   }
-  unsigned long connectTime = millis();
-  //while ((millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT && WiFi.status() != WL_CONNECTED)
-  while (WiFi.status() != WL_CONNECT_FAILED && WiFi.status() != WL_CONNECTED && (millis() - connectTime) < 1000 * WIFI_CONNECT_TIMEOUT)
+
+  //if in nonblock mode, skip this loop
+  _connectStartTime = millis() + 1;
+  while (!_connectNonBlock && _connectStartTime) {
+    handleWiFi();
     delay(10);
-  if (WiFi.status() == WL_CONNECTED) return true;// { //if timed out, switch to AP mode
-  WiFi.mode(WIFI_AP);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  _apPass.length() ? WiFi.softAP(getApSsid().c_str(), _apPass.c_str()) : WiFi.softAP(getApSsid().c_str());
-  return false;//} //if
-  //moved dns start from here
+  }
+
+  return (WiFi.status() == WL_CONNECTED);
+
 } //attemptConnection
 
+void PersWiFiManager::handleWiFi() {
+  if (!_connectStartTime) return;
+
+  if (WiFi.status() == WL_CONNECTED) {
+    _connectStartTime = 0;
+    if (_connectHandler) _connectHandler();
+    return;
+  }
+
+  //if failed or not connected and time is up
+  if ((WiFi.status() == WL_CONNECT_FAILED) || (WiFi.status() != WL_CONNECTED && (millis() - _connectStartTime) > 1000 * WIFI_CONNECT_TIMEOUT)) {
+    //start AP mode
+    IPAddress apIP(192, 168, 1, 1);
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    _apPass.length() ? WiFi.softAP(getApSsid().c_str(), _apPass.c_str()) : WiFi.softAP(getApSsid().c_str());
+    _connectStartTime = 0; //reset connect start time
+    if (_failHandler) _failHandler();
+  }
+
+} //handleWiFi
+
+void PersWiFiManager::setConnectNonBlock(bool b) {
+  _connectNonBlock = b;
+} //setConnectNonBlock
+
 void PersWiFiManager::setupWiFiHandlers() {
+  IPAddress apIP(192, 168, 1, 1);
+  _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
+  _dnsServer->start((byte)53, "*", apIP); //used for captive portal in AP mode
+
   _server->on("/wifi/list", [&] () {
     //scan for wifi networks
     int n = WiFi.scanNetworks();
@@ -112,4 +137,13 @@ void PersWiFiManager::setApCredentials(const String& apSsid, const String& apPas
   if (apSsid.length()) _apSsid = apSsid;
   if (apPass.length() >= 8) _apPass = apPass;
 } //setApCredentials
+
+void PersWiFiManager::onConnect(WiFiChangeHandlerFunction fn) {
+  _connectHandler = fn;
+}
+
+void PersWiFiManager::onFail(WiFiChangeHandlerFunction fn) {
+  _failHandler = fn;
+}
+
 

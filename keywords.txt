@@ -17,6 +17,8 @@ setupWiFiHandlers	KEYWORD2
 begin	KEYWORD2
 getApSsid	KEYWORD2
 setApCredentials	KEYWORD2
+handleWiFi	KEYWORD2
+setConnectNonBlock	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
