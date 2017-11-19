@@ -1,3 +1,9 @@
+---
+testdata:abc
+---
+
+{{page.testdata}}
+
 # PersWiFiManager
 Persistent WiFiManager Arduino library for ESP8266-based microcontrollers
 
