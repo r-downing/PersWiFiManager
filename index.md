@@ -74,7 +74,7 @@ The library can be installed and included like a normal Arduino library. The *wi
 For a quick and easy way to serve files from SPIFFS, see my [SPIFFSReadServer](https://github.com/r-downing/SPIFFSReadServer#spiffsreadserver) library.
 
 
-The PersWiFiManager object should be declared in the same scope as the servers, which are passed as arguements in the constructor.
+The PersWiFiManager object should be declared in the same scope as the servers, which are passed as arguments in the constructor.
 
 ```cpp
 ESP8266WebServer server(80);
