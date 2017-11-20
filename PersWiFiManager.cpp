@@ -1,5 +1,5 @@
 /* PersWiFiManager
-   version 2.0.2 - nonblock mod
+   version 3.0.0
    https://r-downing.github.io/PersWiFiManager/
 */
 

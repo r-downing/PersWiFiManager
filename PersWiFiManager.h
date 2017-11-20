@@ -13,7 +13,6 @@ class PersWiFiManager {
 
     typedef std::function<void(void)> WiFiChangeHandlerFunction;
 
-    //constructor - takes inputs for ESP8266WebServer and DNSServer, optional ap ssid
     PersWiFiManager(ESP8266WebServer& s, DNSServer& d);
 
     bool attemptConnection(const String& ssid = "", const String& pass = "");
