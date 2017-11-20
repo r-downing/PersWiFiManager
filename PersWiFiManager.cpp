@@ -26,7 +26,7 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
   }
 
   //if in nonblock mode, skip this loop
-  _connectStartTime = millis() + 1;
+  _connectStartTime = millis();// + 1;
   while (!_connectNonBlock && _connectStartTime) {
     handleWiFi();
     delay(10);
@@ -46,17 +46,21 @@ void PersWiFiManager::handleWiFi() {
   }
 
   //if failed or not connected and time is up
-  if ((WiFi.status() == WL_CONNECT_FAILED) || (WiFi.status() != WL_CONNECTED && (millis() - _connectStartTime) > 1000 * WIFI_CONNECT_TIMEOUT)) {
-    //start AP mode
-    IPAddress apIP(192, 168, 1, 1);
-    WiFi.mode(WIFI_AP);
-    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    _apPass.length() ? WiFi.softAP(getApSsid().c_str(), _apPass.c_str()) : WiFi.softAP(getApSsid().c_str());
+  if ((WiFi.status() == WL_CONNECT_FAILED) || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
+    startApMode();
     _connectStartTime = 0; //reset connect start time
     if (_failHandler) _failHandler();
   }
 
 } //handleWiFi
+
+void PersWiFiManager::startApMode(){
+  //start AP mode
+  IPAddress apIP(192, 168, 1, 1);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  _apPass.length() ? WiFi.softAP(getApSsid().c_str(), _apPass.c_str()) : WiFi.softAP(getApSsid().c_str());
+}//startApMode
 
 void PersWiFiManager::setConnectNonBlock(bool b) {
   _connectNonBlock = b;
@@ -109,6 +113,11 @@ void PersWiFiManager::setupWiFiHandlers() {
     _server->send(200, "text/html", "connecting...");
     attemptConnection(_server->arg("n"), _server->arg("p"));
   }); //_server->on /wifi/connect
+
+  _server->on("/wifi/ap", [&](){
+    _server->send(200, "text/html", "access point: "+getApSsid());
+    startApMode();
+  }); //_server->on /wifi/ap
 
   _server->on("/wifi/rst", [&]() {
     _server->send(200, "text/html", "Rebooting...");

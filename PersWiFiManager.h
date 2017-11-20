@@ -29,6 +29,8 @@ class PersWiFiManager {
 
     void handleWiFi();
 
+    void startApMode();
+
     void onConnect(WiFiChangeHandlerFunction fn);
 
     void onFail(WiFiChangeHandlerFunction fn);
