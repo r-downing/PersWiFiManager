@@ -45,4 +45,3 @@ Commas in the SSID are ok; the javascript in the wifi.htm page splits the lines 
 
 ![](assets/img/ui-wps.png)
 
-{% include sharebuttons.html %}
