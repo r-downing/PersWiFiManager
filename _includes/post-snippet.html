@@ -1,0 +1,12 @@
+<li>	
+	{% assign date_format = site.cayman-blog.date_format | default: "%b %-d, %Y" %}
+	<span class="post-meta">{{ post.date | date: date_format }}</span>
+
+	<h2>
+		<a class="post-link" href="{{ post.url | relative_url }}" title="{{ post.title }}">{{ post.title | escape }}</a>
+	</h2>
+
+	<span>{{ post.excerpt | strip_html | truncatewords: 30 }}</span>
+	<a href="{{ post.url | relative_url }}">(more...)</a>
+
+</li>
