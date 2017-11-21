@@ -1,11 +1,66 @@
-https://www.facebook.com/sharer/sharer.php?u={{page.url | absolute_url | url_encode}}
 
-https://twitter.com/home?status={{page.url | absolute_url | url_encode}}
 
-https://plus.google.com/share?url={{page.url | absolute_url | url_encode}}
-
-https://www.linkedin.com/shareArticle?mini=true&url={{page.url | absolute_url | url_encode}}&title={{page.title | url_encode}}&summary=&source=
-
-mailto:?&subject={{page.title | url_encode}}&body={{page.url | absolute_url | url_encode}}
-
-http://www.reddit.com/submit?url={{page.url | absolute_url | url_encode}}&title={{page.title | url_encode}}
+<ul class="list-inline list-social-icons">
+  <li class="list-inline-item">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-share-alt fa-stack-1x fa-inverse"></i>
+      </span>
+  </li>
+  <!-- <li class="list-inline-item">
+    <a href="javascript:window.clipboardData.setData('Text', location.href);">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-clipboard fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li> -->
+  <li class="list-inline-item">
+    <a href="mailto:?&subject={{page.title | url_encode}}&body=%0A{{page.url | absolute_url | url_encode}}">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  <li class="list-inline-item">
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{page.url | absolute_url | url_encode}}">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  <li class="list-inline-item">
+    <a href="https://twitter.com/home?status={{page.url | absolute_url | url_encode}}">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  <li class="list-inline-item">
+    <a href="http://www.reddit.com/submit?url={{page.url | absolute_url | url_encode}}&title={{page.title | url_encode}}">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-reddit-alien fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  <li class="list-inline-item">
+    <a href="https://plus.google.com/share?url={{page.url | absolute_url | url_encode}}">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  <li class="list-inline-item">
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{page.url | absolute_url | url_encode}}&title={{page.title | url_encode}}&summary=&source=">
+      <span class="fa-stack">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+</ul>
