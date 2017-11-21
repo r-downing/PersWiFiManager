@@ -8,7 +8,7 @@
 layout: home
 ---
 
-{{page.url | absolute_url | url_escape}}
+{{page.url | absolute_url | uri_escape}}
 
 
 This Persistent WiFi Manager provides a WiFi Settings web interface for ESP8266-based microcontrollers. It can autoconnect to the last used network, and then if unsuccessful, switch to AP mode with a captive DNS server. This action is non-blocking; the program will proceed to the main loop after, regardless of WiFi connection status. In AP mode, any device (phone, computer, etc) can connect to this network to configure the wifi connection, or access the device as a webserver. 
