@@ -140,3 +140,12 @@
   display: block;
   @include relative-font-size(1.5);
 }
+
+ul.list-inline {
+    list-style: none;
+    padding-left: 0;
+}
+
+li.list-inline-item {
+    display: inline-block;
+}
