@@ -19,6 +19,9 @@ getApSsid	KEYWORD2
 setApCredentials	KEYWORD2
 handleWiFi	KEYWORD2
 setConnectNonBlock	KEYWORD2
+startApMode KEYWORD2
+onConnect KEYWORD2
+onAp  KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
