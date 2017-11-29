@@ -45,7 +45,7 @@ void setup() {
     EasySSDP::begin(server);
   });
 
-  persWM.onFail([](){
+  persWM.onAp([](){
     DEBUG_PRINT("AP MODE");
     DEBUG_PRINT(persWM.getApSsid());
   });
@@ -90,11 +90,10 @@ void setup() {
 
 void loop() {
   persWM.handleWiFi();
-  //Serial.println(millis());
   dnsServer.processNextRequest();
   server.handleClient();
 
-  DEBUG_PRINT(millis());
+  //DEBUG_PRINT(millis());
 
   // do stuff with x and y
 

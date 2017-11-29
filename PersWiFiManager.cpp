@@ -49,7 +49,6 @@ void PersWiFiManager::handleWiFi() {
   if ((WiFi.status() == WL_CONNECT_FAILED) || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
     startApMode();
     _connectStartTime = 0; //reset connect start time
-    if (_failHandler) _failHandler();
   }
 
 } //handleWiFi
@@ -60,6 +59,7 @@ void PersWiFiManager::startApMode(){
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   _apPass.length() ? WiFi.softAP(getApSsid().c_str(), _apPass.c_str()) : WiFi.softAP(getApSsid().c_str());
+  if (_apHandler) _apHandler();  
 }//startApMode
 
 void PersWiFiManager::setConnectNonBlock(bool b) {
@@ -151,8 +151,8 @@ void PersWiFiManager::onConnect(WiFiChangeHandlerFunction fn) {
   _connectHandler = fn;
 }
 
-void PersWiFiManager::onFail(WiFiChangeHandlerFunction fn) {
-  _failHandler = fn;
+void PersWiFiManager::onAp(WiFiChangeHandlerFunction fn) {
+  _apHandler = fn;
 }
 
 

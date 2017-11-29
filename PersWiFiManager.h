@@ -33,7 +33,7 @@ class PersWiFiManager {
 
     void onConnect(WiFiChangeHandlerFunction fn);
 
-    void onFail(WiFiChangeHandlerFunction fn);
+    void onAp(WiFiChangeHandlerFunction fn);
 
   private:
     ESP8266WebServer * _server;
@@ -44,7 +44,7 @@ class PersWiFiManager {
     unsigned long _connectStartTime;
 
     WiFiChangeHandlerFunction _connectHandler;
-    WiFiChangeHandlerFunction _failHandler;
+    WiFiChangeHandlerFunction _apHandler;
 
 };//class
 
