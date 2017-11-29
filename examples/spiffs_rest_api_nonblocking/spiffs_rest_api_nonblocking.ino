@@ -61,7 +61,10 @@ void setup() {
   persWM.setApCredentials(DEVICE_NAME);
   //persWM.setApCredentials(DEVICE_NAME, "password"); optional password
 
+  //make connecting/disconnecting non-blocking
   persWM.setConnectNonBlock(true);
+
+  //in non-blocking mode, program will continue past this point without waiting
   persWM.begin();
 
   //handles commands from webpage, sends live data in JSON format
