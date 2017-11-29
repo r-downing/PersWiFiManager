@@ -1,3 +1,7 @@
+/*
+SPIFFS-served REST API example for PersWiFiManager v3.0
+*/
+
 #define DEBUG_SERIAL //uncomment for Serial debugging statements
 
 #ifdef DEBUG_SERIAL
@@ -39,12 +43,13 @@ void setup() {
   DEBUG_BEGIN; //for terminal debugging
   DEBUG_PRINT();
   
+  //optional code handlers to run everytime wifi is connected...
   persWM.onConnect([]() {
     DEBUG_PRINT("wifi connected");
     DEBUG_PRINT(WiFi.localIP());
     EasySSDP::begin(server);
   });
-
+  //...or AP mode is started
   persWM.onAp([](){
     DEBUG_PRINT("AP MODE");
     DEBUG_PRINT(persWM.getApSsid());
@@ -89,7 +94,9 @@ void setup() {
 } //void setup
 
 void loop() {
+  //in non-blocking mode, handleWiFi must be called in the main loop
   persWM.handleWiFi();
+
   dnsServer.processNextRequest();
   server.handleClient();
 
