@@ -18,6 +18,8 @@ api-class: PersWiFiManager
 
 This will run the handler function every time the WiFi settings are changed and then a successful connection is made.
 
+For unsuccessful / AP mode connection handler, see [`onAp`]({{site.baseurl}}/api/PersWiFiManager/onAp)
+
 ## Example Code
 
 ```cpp
