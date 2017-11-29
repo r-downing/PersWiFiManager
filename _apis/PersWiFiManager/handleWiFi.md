@@ -13,4 +13,4 @@ api-class: PersWiFiManager
 
 This function does not need to be called in normal mode. 
 
-If the PersWiFiManager is set to non-blocking mode with [`setConnectNonBlock`](/api/PersWiFiManager/setConnectNonBlock), this must be called in the main loop.
+If the PersWiFiManager is set to non-blocking mode with [`setConnectNonBlock`]({{site.baseurl}}/api/PersWiFiManager/setConnectNonBlock), this must be called in the main loop.

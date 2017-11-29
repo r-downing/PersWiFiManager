@@ -17,4 +17,4 @@ api-class: PersWiFiManager
 
 ## Notes
 
-In non-blocking mode, [`handleWiFi`](/api/PersWiFiManager/handleWiFi) must be called in the main loop
+In non-blocking mode, [`handleWiFi`]({{site.baseurl}}/api/PersWiFiManager/handleWiFi) must be called in the main loop
