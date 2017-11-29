@@ -1,5 +1,5 @@
 /* PersWiFiManager
-   version 3.0.0
+   version 3.0.1
    https://r-downing.github.io/PersWiFiManager/
 */
 
