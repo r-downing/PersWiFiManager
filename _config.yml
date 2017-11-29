@@ -40,3 +40,8 @@ defaults:
   values:
     layout: api
     api-group: functions
+- scope:
+    path: ""
+    type: "posts"
+  values:
+    layout: post

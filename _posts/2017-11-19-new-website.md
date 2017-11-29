@@ -1,7 +1,5 @@
 ---
 title: New Website
-layout: post
-
 ---
 
 Welcome to the new home of the PersWiFiManager docs page. I used a full jekyll template rather than just a gh-pages template, so I have a lot more control over how things are laid out. Hopefully it will be easier to update as well.
