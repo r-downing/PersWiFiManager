@@ -112,7 +112,11 @@ void PersWiFiManager::setupWiFiHandlers() {
   _server->on("/wifi/rst", [&]() {
     _server->send(200, "text/html", "Rebooting...");
     delay(100);
-    ESP.restart();
+    //ESP.restart();
+	// Adding Safer Restart method
+	ESP.wdtDisable();
+	ESP.reset();
+	delay(2000);
   });
 
 #ifdef WIFI_HTM_PROGMEM
