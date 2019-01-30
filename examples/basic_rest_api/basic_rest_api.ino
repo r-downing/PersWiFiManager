@@ -11,19 +11,36 @@
 //includes
 #include <PersWiFiManager.h>
 #include <ArduinoJson.h>
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESP8266SSDP.h>
 #include <ESP8266WebServer.h>
-#include <DNSServer.h>
 #include <FS.h>
+#elif defined(ESP32)
+#include <WiFi.h>
+#include <ESP32SSDP.h>
+#include <WebServer.h>
+#include <SPIFFS.h>
+#else
+#error "Unsupported board class"
+#endif
+#include <DNSServer.h>
 
+#if defined(ESP8266)
 #define DEVICE_NAME "ESP8266 DEVICE"
+#elif defined(ESP32)
+#define DEVICE_NAME "ESP32 DEVICE"
+#endif
 
 //const char *metaRefreshStr = "<head><meta http-equiv=\"refresh\" content=\"1; url=/\" /></head><body><a href=\"/\">redirecting...</a></body>";
 const char *metaRefreshStr = "<script>window.location='/'</script><a href='/'>redirecting...</a>";
 
 //server objects
+#if defined(ESP8266)
 ESP8266WebServer server(80);
+#elif defined(ESP32)
+WebServer server(80);
+#endif
 DNSServer dnsServer;
 PersWiFiManager persWM(server, dnsServer);
 
@@ -138,8 +155,8 @@ void setup() {
   SSDP.setHTTPPort(80);
   SSDP.setName(DEVICE_NAME);
   SSDP.setURL("/");
-  SSDP.begin();
   SSDP.setDeviceType("upnp:rootdevice");
+  SSDP.begin();
 
   server.begin();
   DEBUG_PRINT("setup complete.");
