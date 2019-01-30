@@ -158,10 +158,6 @@ void PersWiFiManager::setConnectNonBlock(bool b) {
   _connectNonBlock = b;
 } //setConnectNonBlock
 
-#if defined(ESP32)
-#define ENC_TYPE_NONE 7
-#endif
-
 IPAddress apIP(192, 168, 1, 1);
 
 void PersWiFiManager::setupWiFiHandlers() {
