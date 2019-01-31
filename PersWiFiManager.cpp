@@ -5,6 +5,10 @@
 
 #include "PersWiFiManager.h"
 
+#if defined(ESP32)
+#include <esp_wifi.h>
+#endif
+
 #ifdef WIFI_HTM_PROGMEM
 const char wifi_htm[] PROGMEM = R"=====(" \
 "<!DOCTYPE html>" \
@@ -115,11 +119,20 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
     else WiFi.begin(ssid.c_str());
   } else {
-    WiFi.begin();
-    if(!WiFi.SSID().length()) { // No saved credentials, so skip trying to connect
+#if defined(ESP8266)
+    if(!WiFi.SSID().length() && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
+#elif defined(ESP32)
+    wifi_config_t conf;
+    esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct comf
+    const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
+    const char *password = reinterpret_cast<const char*>(conf.sta.password);
+    if((!SSID || strlen(SSID) <= 1) && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
+#endif
       _connectStartTime = millis();
       _freshConnectionAttempt = true;
       return false;
+    } else {
+      WiFi.begin();
     }
   }
 
@@ -143,9 +156,8 @@ void PersWiFiManager::handleWiFi() {
     return;
   }
 
-  //if failed or no saved SSID or not connected and time is up
+  //if failed or no saved SSID or no WiFi credentials were found or not connected and time is up
   if ((WiFi.status() == WL_CONNECT_FAILED) || _freshConnectionAttempt || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
-//  if ((WiFi.status() == WL_CONNECT_FAILED) || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
     startApMode();
     _connectStartTime = 0; //reset connect start time
     _freshConnectionAttempt = false;
