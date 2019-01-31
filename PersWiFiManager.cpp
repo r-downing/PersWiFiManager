@@ -179,7 +179,7 @@ void PersWiFiManager::setConnectNonBlock(bool b) {
 } //setConnectNonBlock
 
 void PersWiFiManager::setupWiFiHandlers() {
-  IPAddress apIP(192, 168, 1, 1);
+  IPAddress apIP(192, 168, 4, 1);
   _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   _dnsServer->start((byte)53, "*", apIP); //used for captive portal in AP mode
 
