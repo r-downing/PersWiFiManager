@@ -57,6 +57,7 @@ class PersWiFiManager {
 
     bool _connectNonBlock;
     unsigned long _connectStartTime;
+    bool _freshConnectionAttempt;
 
     WiFiChangeHandlerFunction _connectHandler;
     WiFiChangeHandlerFunction _apHandler;

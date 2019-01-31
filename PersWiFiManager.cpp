@@ -105,6 +105,7 @@ PersWiFiManager::PersWiFiManager(WebServer& s, DNSServer& d) {
   _server = &s;
   _dnsServer = &d;
   _apPass = "";
+  _freshConnectionAttempt = false;
 } //PersWiFiManager
 
 bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) {
@@ -114,11 +115,12 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
     else WiFi.begin(ssid.c_str());
   } else {
+    WiFi.begin();
     if(!WiFi.SSID().length()) { // No saved credentials, so skip trying to connect
       _connectStartTime = millis();
+      _freshConnectionAttempt = true;
       return false;
     }
-    WiFi.begin();
   }
 
   //if in nonblock mode, skip this loop
@@ -142,9 +144,11 @@ void PersWiFiManager::handleWiFi() {
   }
 
   //if failed or no saved SSID or not connected and time is up
-  if ((WiFi.status() == WL_CONNECT_FAILED) || !WiFi.SSID().length() || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
+  if ((WiFi.status() == WL_CONNECT_FAILED) || _freshConnectionAttempt || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
+//  if ((WiFi.status() == WL_CONNECT_FAILED) || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
     startApMode();
     _connectStartTime = 0; //reset connect start time
+    _freshConnectionAttempt = false;
   }
 
 } //handleWiFi
