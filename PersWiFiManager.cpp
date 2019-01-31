@@ -147,7 +147,6 @@ void PersWiFiManager::handleWiFi() {
 
 void PersWiFiManager::startApMode(){
   //start AP mode
-//  IPAddress apIP(192, 168, 1, 1);
   IPAddress apIP(192, 168, 4, 1);
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
