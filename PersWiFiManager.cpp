@@ -120,7 +120,7 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     else WiFi.begin(ssid.c_str());
   } else {
 #if defined(ESP8266)
-    if(!WiFi.SSID().length() && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
+    if((WiFi.SSID().length() <= 1) && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
 #elif defined(ESP32)
     wifi_config_t conf;
     esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct comf
