@@ -114,6 +114,10 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
     else WiFi.begin(ssid.c_str());
   } else {
+    if(!WiFi.SSID().length()) { // No saved credentials, so skip trying to connect
+      _connectStartTime = millis();
+      return false;
+    }
     WiFi.begin();
   }
 
@@ -137,8 +141,8 @@ void PersWiFiManager::handleWiFi() {
     return;
   }
 
-  //if failed or not connected and time is up
-  if ((WiFi.status() == WL_CONNECT_FAILED) || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
+  //if failed or no saved SSID or not connected and time is up
+  if ((WiFi.status() == WL_CONNECT_FAILED) || !WiFi.SSID().length() || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
     startApMode();
     _connectStartTime = 0; //reset connect start time
   }
@@ -232,7 +236,8 @@ void PersWiFiManager::setupWiFiHandlers() {
 
 bool PersWiFiManager::begin(const String& ssid, const String& pass) {
 #if defined(ESP32)
-    WiFi.mode(WIFI_AP);  // ESP32 needs this before setupWiFiHandlers(). Might be good for ESP8266 too?
+//    WiFi.mode(WIFI_AP);  // ESP32 needs this before setupWiFiHandlers(). Might be good for ESP8266 too?
+    WiFi.mode(WIFI_STA);  // ESP32 needs this before setupWiFiHandlers(). Might be good for ESP8266 too?
 #endif
   setupWiFiHandlers();
   return attemptConnection(ssid, pass); //switched order of these two for return
