@@ -147,7 +147,8 @@ void PersWiFiManager::handleWiFi() {
 
 void PersWiFiManager::startApMode(){
   //start AP mode
-  IPAddress apIP(192, 168, 1, 1);
+//  IPAddress apIP(192, 168, 1, 1);
+  IPAddress apIP(192, 168, 4, 1);
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   _apPass.length() ? WiFi.softAP(getApSsid().c_str(), _apPass.c_str()) : WiFi.softAP(getApSsid().c_str());
@@ -157,8 +158,6 @@ void PersWiFiManager::startApMode(){
 void PersWiFiManager::setConnectNonBlock(bool b) {
   _connectNonBlock = b;
 } //setConnectNonBlock
-
-IPAddress apIP(192, 168, 1, 1);
 
 void PersWiFiManager::setupWiFiHandlers() {
   IPAddress apIP(192, 168, 1, 1);
