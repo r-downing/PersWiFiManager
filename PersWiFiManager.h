@@ -36,6 +36,8 @@ class PersWiFiManager {
 
     String getApSsid();
 
+    String getSsid();
+
     void setApCredentials(const String& apSsid, const String& apPass = "");
 
     void setConnectNonBlock(bool b);

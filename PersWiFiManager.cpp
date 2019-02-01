@@ -120,15 +120,7 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
     else WiFi.begin(ssid.c_str());
   } else {
-#if defined(ESP8266)
-    if((WiFi.SSID().length() == 0) && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
-#elif defined(ESP32)
-    wifi_config_t conf;
-    esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct comf
-    const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
-    const char *password = reinterpret_cast<const char*>(conf.sta.password);
-    if((strlen(SSID) == 0) && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
-#endif
+    if((getSsid() == "") && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
       _connectStartTime = millis();
       _freshConnectionAttempt = true;
       return false;
@@ -277,6 +269,17 @@ String PersWiFiManager::getApSsid() {
   return _apSsid.length() ? _apSsid : "ESP32";
 #endif
 } //getApSsid
+
+String PersWiFiManager::getSsid() {
+#if defined(ESP8266)
+  return WiFi.SSID();
+#elif defined(ESP32)
+  wifi_config_t conf;
+  esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct comf
+  const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
+  return String(SSID);
+#endif
+} //getSsid
 
 void PersWiFiManager::setApCredentials(const String& apSsid, const String& apPass) {
   if (apSsid.length()) _apSsid = apSsid;
