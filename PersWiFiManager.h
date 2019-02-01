@@ -28,6 +28,8 @@ class PersWiFiManager {
 
     bool attemptConnection(const String& ssid = "", const String& pass = "");
 
+    void reportStatus(String &page);
+
     void setupWiFiHandlers();
 
     bool begin(const String& ssid = "", const String& pass = "");
@@ -35,6 +37,8 @@ class PersWiFiManager {
     void resetSettings();
 
     String getApSsid();
+
+    String getSsid();
 
     void setApCredentials(const String& apSsid, const String& apPass = "");
 

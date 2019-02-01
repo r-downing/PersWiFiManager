@@ -9,96 +9,100 @@
 #include <esp_wifi.h>
 #endif
 
+#define WIFI_HTM_PROGMEM
+
 #ifdef WIFI_HTM_PROGMEM
-const char wifi_htm[] PROGMEM = R"=====(" \
-"<!DOCTYPE html>" \
-"<html>" \
-    "<head>" \
-        "<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>" \
-        "<title>ESP WiFi</title>" \
-        "<script>" \
-            "function g(i){" \
-                "return document.getElementById(i);" \
-            "};" \
-            "function p(t,l){" \
-                "if(confirm(t)) window.location=l;" \
-            "};" \
-            "function E(s){" \
-                "return document.createElement(s)" \
-            "};" \
-            "var S="setAttribute",A="appendChild",H="innerHTML",X,wl;" \
-            "function scan(){" \
-                "if(X) return;" \
-                "X=new XMLHttpRequest(),wl=document.getElementById('wl');" \
-                "wl[H]="Scanning...";" \
-                "X.onreadystatechange=function(){" \
-                    "if (this.readyState==4&&this.status==200){" \
-                        "X=0;wl[H]="";" \
-                        "this.responseText.split("\n").forEach(function (e){" \
-                            "let t=e.split(","), s=t.slice(2).join(',');" \
-                            "var d=E('div'),i=E('a'),c=E('a');" \
-                            "i[S]('class','s');" \
-                            "c[S]('class','q');" \
-                            "i.onclick=function(){" \
-                                "g('s').value=s;" \
-                                "g('p').focus();" \
-                            "};" \
-                            "i[A](document.createTextNode(s));" \
-                            "c[H]=t[0]+"%"+(parseInt(t[1])?"\uD83D\uDD12":"\u26A0");" \
-                            "wl[A](i); " \
-                            "wl[A](c);" \
-                            "wl[A](document.createElement('br'));" \
-                        "});" \
-                     "}" \
-                "};" \
-                "X.open("GET","wifi/list",true);" \
-                "X.send();" \
-            "};" \
-        "</script>" \
-        "<style>" \
-            "input{" \
-                "padding:5px;font-size:1em;width:95%;" \
-            "}" \
-            "body{" \
-                "text-align:center;font-family:verdana;background-color:black;color:white;" \
-            "}" \
-            "a{" \
-                "color:#1fa3ec;" \
-            "}" \
-            "button{" \
-                "border:0;border-radius:0.3em;background-color:#1fa3ec;color:#fff;" \
-                "line-height:2.4em;font-size:1.2em;width:100%;display:block;" \
-            "}" \
-            ".q{" \
-                "float:right;" \
-            "}" \
-            ".s{" \
-                "display:inline-block;width:14em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" \
-            "}" \
-            "#wl{" \
-                "line-height:1.5em;" \
-            "}" \
-        "</style>" \
-    "</head>" \
-    "<body>" \
-        "<div style='text-align:left;display:inline-block;width:320px;padding:5px'>" \
-            "<button onclick="scan()">&#x21bb; Scan</button>" \
-            "<p id='wl'></p>" \
-            "<form method='post' action='/wifi/connect'>" \
-                "<input id='s' name='n' length=32 placeholder='SSID'>" \
-                "<br>" \
-                "<input id='p' name='p' length=64 type='password' placeholder='password'>" \
-                "<br><br>" \
-                "<button type='submit'>Connect</button>" \
-            "</form>" \
-            "<br><br>" \
-            "<button onclick="p('Reboot device?','/wifi/rst')">Reboot</button>" \
-            "<br>" \
-            "<a href="javascript:history.back()">Back</a> |<a href="/">Home</a>" \
-        "</div>" \
-    "</body>" \
-"</html>" \
-")=====";
+const char wifi_htm[] PROGMEM = R"=====(
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+        <title>ESP WiFi</title>
+        <script>
+            function g(i){
+                return document.getElementById(i);
+            };
+            function p(t,l){
+                if(confirm(t)) window.location=l;
+            };
+            function E(s){
+                return document.createElement(s)
+            };
+            var S="setAttribute",A="appendChild",H="innerHTML",X,wl;
+            function scan(){
+                if(X) return;
+                X=new XMLHttpRequest(),wl=document.getElementById('wl');
+                wl[H]="Scanning...";
+                X.onreadystatechange=function(){
+                    if (this.readyState==4&&this.status==200){
+                        X=0;wl[H]="";
+                        this.responseText.split("\n").forEach(function (e){
+                            let t=e.split(","), s=t.slice(2).join(',');
+                            var d=E('div'),i=E('a'),c=E('a');
+                            i[S]('class','s');
+                            c[S]('class','q');
+                            i.onclick=function(){
+                                g('s').value=s;
+                                g('p').focus();
+                            };
+                            i[A](document.createTextNode(s));
+                            c[H]=t[0]+"%"+(parseInt(t[1])?"\uD83D\uDD12":"\u26A0");
+                            wl[A](i); 
+                            wl[A](c);
+                            wl[A](document.createElement('br'));
+                        });
+                     }
+                };
+                X.open("GET","wifi/list",true);
+                X.send();
+            };
+        </script>
+        <style>
+            input{
+                padding:5px;font-size:1em;width:95%;
+            }
+            body{
+                text-align:center;font-family:verdana;background-color:black;color:white;
+            }
+            a{
+                color:#1fa3ec;
+            }
+            button{
+                border:0;border-radius:0.3em;background-color:#1fa3ec;color:#fff;
+                line-height:2.4em;font-size:1.2em;width:100%;display:block;
+            }
+            .q{
+                float:right;
+            }
+            .s{
+                display:inline-block;width:14em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+            }
+            #wl{
+                line-height:1.5em;
+            }
+        </style>
+    </head>
+    <body>
+        <div style='text-align:left;display:inline-block;width:320px;padding:5px'>
+            <button onclick="scan()">&#x21bb; Scan</button>
+            <p id='wl'></p>
+            <form method='post' action='/wifi/connect'>
+                <input id='s' name='n' length=32 placeholder='SSID'>
+                <br>
+                <input id='p' name='p' length=64 type='password' placeholder='password'>
+                <br><br>
+                <button type='submit'>Connect</button>
+            </form>
+            <br><br>
+            <button onclick="p('Reboot device?','/wifi/rst')">Reboot</button>
+            <br>
+            {{status}}
+            <br>
+            <a href="javascript:history.back()">Back</a> |<a href="/">Home</a>
+        </div>
+    </body>
+</html>
+)=====";
 #endif
 
 #if defined(ESP8266)
@@ -120,15 +124,7 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
     else WiFi.begin(ssid.c_str());
   } else {
-#if defined(ESP8266)
-    if((WiFi.SSID().length() == 0) && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
-#elif defined(ESP32)
-    wifi_config_t conf;
-    esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct comf
-    const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
-    const char *password = reinterpret_cast<const char*>(conf.sta.password);
-    if((strlen(SSID) == 0) && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
-#endif
+    if((getSsid() == "") && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
       _connectStartTime = millis();
       _freshConnectionAttempt = true;
       return false;
@@ -147,6 +143,26 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
   return (WiFi.status() == WL_CONNECTED);
 
 } //attemptConnection
+
+void PersWiFiManager::reportStatus(String &page) {
+  String statusReport;
+  if (getSsid() != "") {
+    statusReport += F("Configured to connect to access point ");
+    statusReport += getSsid();
+    if (WiFi.status()==WL_CONNECTED){
+      statusReport += F(" and <strong>currently connected</strong> on IP <a href=\"http://");
+      statusReport += WiFi.localIP().toString();
+      statusReport += F("/\">");
+      statusReport += WiFi.localIP().toString();
+      statusReport += F("</a>");
+    } else {
+      statusReport += F(" but <strong>not currently connected</strong> to network.");
+    }
+  } else {
+    statusReport += F("No network currently configured.");
+  }
+  page.replace(F("{{status}}"), statusReport);
+} // reportStatus
 
 void PersWiFiManager::handleWiFi() {
   if (!_connectStartTime) return;
@@ -245,7 +261,11 @@ void PersWiFiManager::setupWiFiHandlers() {
   _server->on("/wifi.htm", [&]() {
     _server->sendHeader("Cache-Control", " no-cache, no-store, must-revalidate");
     _server->sendHeader("Expires", " 0");
-    _server->send(200, "text/html", wifi_htm);
+//    _server->send(200, "text/html", wifi_htm);
+    String page = wifi_htm;
+    reportStatus(page);
+Serial.printf("Page: '%s'\n", page.c_str());
+    _server->send(200, "text/html", page);
   });
 #endif
 
@@ -277,6 +297,17 @@ String PersWiFiManager::getApSsid() {
   return _apSsid.length() ? _apSsid : "ESP32";
 #endif
 } //getApSsid
+
+String PersWiFiManager::getSsid() {
+#if defined(ESP8266)
+  return WiFi.SSID();
+#elif defined(ESP32)
+  wifi_config_t conf;
+  esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct conf
+  const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
+  return String(SSID);
+#endif
+} //getSsid
 
 void PersWiFiManager::setApCredentials(const String& apSsid, const String& apPass) {
   if (apSsid.length()) _apSsid = apSsid;
