@@ -116,6 +116,7 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
   //attempt to connect to wifi
   WiFi.mode(WIFI_STA);
   if (ssid.length()) {
+    resetSettings(); // To avoid issues (experience from WiFiManager)
     if (pass.length()) WiFi.begin(ssid.c_str(), pass.c_str());
     else WiFi.begin(ssid.c_str());
   } else {
