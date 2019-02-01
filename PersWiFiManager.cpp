@@ -120,13 +120,13 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     else WiFi.begin(ssid.c_str());
   } else {
 #if defined(ESP8266)
-    if((WiFi.SSID().length() <= 1) && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
+    if((WiFi.SSID().length() == 0) && (WiFi.status() != WL_CONNECTED)) { // No saved credentials, so skip trying to connect
 #elif defined(ESP32)
     wifi_config_t conf;
     esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct comf
     const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
     const char *password = reinterpret_cast<const char*>(conf.sta.password);
-    if((!SSID || strlen(SSID) <= 1) && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
+    if((strlen(SSID) == 0) && WiFi.status() != WL_CONNECTED) { // No saved credentials, so skip trying to connect
 #endif
       _connectStartTime = millis();
       _freshConnectionAttempt = true;
@@ -252,12 +252,22 @@ void PersWiFiManager::setupWiFiHandlers() {
 
 bool PersWiFiManager::begin(const String& ssid, const String& pass) {
 #if defined(ESP32)
-//    WiFi.mode(WIFI_AP);  // ESP32 needs this before setupWiFiHandlers(). Might be good for ESP8266 too?
     WiFi.mode(WIFI_STA);  // ESP32 needs this before setupWiFiHandlers(). Might be good for ESP8266 too?
 #endif
   setupWiFiHandlers();
   return attemptConnection(ssid, pass); //switched order of these two for return
 } //begin
+
+void PersWiFiManager::resetSettings() {
+#if defined(ESP8266)
+  WiFi.disconnect();
+#elif defined(ESP32)
+  wifi_mode_t m = WiFi.getMode();
+  if(!(m & WIFI_MODE_STA)) WiFi.mode(WIFI_STA);
+  WiFi.disconnect(false, true);
+  if(!(m & WIFI_MODE_STA)) WiFi.mode(m);
+#endif
+} // resetSettings
 
 String PersWiFiManager::getApSsid() {
 #if defined(ESP8266)

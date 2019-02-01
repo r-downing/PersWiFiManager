@@ -113,6 +113,9 @@ void setup() {
   //allows serving of files from SPIFFS
   SPIFFS.begin();
   persWM.begin();
+  //reset saved settings, clears WiFi credentials e.g. for testing
+  //persWM.resetSettings();
+
 
   //serve files from SPIFFS
   server.onNotFound([]() {

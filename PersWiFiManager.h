@@ -32,6 +32,8 @@ class PersWiFiManager {
 
     bool begin(const String& ssid = "", const String& pass = "");
 
+    void resetSettings();
+
     String getApSsid();
 
     void setApCredentials(const String& apSsid, const String& apPass = "");
