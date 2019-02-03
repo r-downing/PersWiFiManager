@@ -28,8 +28,6 @@ class PersWiFiManager {
 
     bool attemptConnection(const String& ssid = "", const String& pass = "");
 
-    void reportStatus(String &page);
-
     void setupWiFiHandlers();
 
     bool begin(const String& ssid = "", const String& pass = "");
@@ -47,6 +45,8 @@ class PersWiFiManager {
     void handleWiFi();
 
     void startApMode();
+
+    void closeAp();
 
     void onConnect(WiFiChangeHandlerFunction fn);
 
@@ -68,6 +68,9 @@ class PersWiFiManager {
     WiFiChangeHandlerFunction _connectHandler;
     WiFiChangeHandlerFunction _apHandler;
 
+    String buildReport();
+
+    void sendNoCacheHeaders();
 };//class
 
 #endif
