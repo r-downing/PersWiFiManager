@@ -12,7 +12,7 @@
 #endif
 #include <DNSServer.h>
 
-#define WIFI_CONNECT_TIMEOUT 30
+//#define WIFI_CONNECT_TIMEOUT 30
 
 class PersWiFiManager {
 
@@ -30,7 +30,9 @@ class PersWiFiManager {
 
     void setupWiFiHandlers();
 
-    bool begin(const String& ssid = "", const String& pass = "");
+    bool begin(const String& ssid = "", const String& pass = "", time_t apModeTimeoutSeconds = 300);
+
+    void stop();
 
     void resetSettings();
 
@@ -52,6 +54,8 @@ class PersWiFiManager {
 
     void onAp(WiFiChangeHandlerFunction fn);
 
+    void onApClose(WiFiChangeHandlerFunction fn);
+
   private:
 #if defined(ESP8266)
     ESP8266WebServer * _server;
@@ -67,10 +71,14 @@ class PersWiFiManager {
 
     WiFiChangeHandlerFunction _connectHandler;
     WiFiChangeHandlerFunction _apHandler;
+    WiFiChangeHandlerFunction _apCloseHandler;
 
     String buildReport();
 
     void sendNoCacheHeaders();
+
+    time_t _apModeTimeoutMillis;
+    time_t _apModeStartMillis;
 };//class
 
 #endif

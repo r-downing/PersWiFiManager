@@ -135,9 +135,9 @@ const char wifi_htm[] PROGMEM = R"=====(
 #endif
 
 #if defined(ESP8266)
-PersWiFiManager::PersWiFiManager(ESP8266WebServer& s, DNSServer& d) {
+PersWiFiManager::PersWiFiManager(ESP8266WebServer& s, DNSServer& d): _connectHandler(nullptr), _apHandler(nullptr), _apCloseHandler(nullptr) {
 #elif defined(ESP32)
-PersWiFiManager::PersWiFiManager(WebServer& s, DNSServer& d) {
+PersWiFiManager::PersWiFiManager(WebServer& s, DNSServer& d): _connectHandler(nullptr), _apHandler(nullptr), _apCloseHandler(nullptr) {
 #endif
   _server = &s;
   _dnsServer = &d;
@@ -157,6 +157,7 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
     esp_wifi_get_config(WIFI_IF_STA, &conf);  // load wifi settings to struct conf
     const char *SSID = reinterpret_cast<const char*>(conf.sta.ssid);
     const char *psk = reinterpret_cast<const char*>(conf.sta.password);
+if(WiFi.status() == WL_CONNECTED && String(SSID) == ssid && String(psk) == pass) Serial.println("ALREADY CON");
     if(WiFi.status() == WL_CONNECTED && String(SSID) == ssid && String(psk) == pass) return true; // Already connected to this network
 #endif
 
@@ -169,11 +170,18 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
       if((status = WiFi.status()) == WL_CONNECTED) break;
       delay(100);
     }
-    if(status != WL_CONNECTED) WiFi.mode(WIFI_AP); // Remove Station Mode if connecting to router failed
+    if(status != WL_CONNECTED) {
+      wifi_mode_t m = WiFi.getMode();
+      WiFi.mode(WIFI_AP); // Remove Station Mode if connecting to router failed
+      if(!(m & WIFI_AP) && _apHandler) _apHandler();
+    }
   } else {
     if(getSsid() == "") { // No saved credentials, so skip trying to connect
       _connectStartTime = millis();
       _freshConnectionAttempt = true;
+      wifi_mode_t m = WiFi.getMode();
+      WiFi.mode(WIFI_AP); // Set AP Mode because connecting to router is not attempted
+      if(!(m & WIFI_AP) && _apHandler) _apHandler();
       return false;
     } else {
       if(!(WiFi.getMode() & WIFI_STA)) WiFi.mode(wifi_mode_t(WiFi.getMode() | WIFI_STA)); // Add Station Mode to connect to router
@@ -183,7 +191,11 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
         if((status = WiFi.status()) == WL_CONNECTED) break;
         delay(100);
       }
-      if(status != WL_CONNECTED) WiFi.mode(WIFI_AP); // Remove Station Mode if connecting to router failed
+      if(status != WL_CONNECTED) {
+        wifi_mode_t m = WiFi.getMode();
+        WiFi.mode(WIFI_AP); // Remove Station Mode if connecting to router failed
+        if(!(m & WIFI_AP) && _apHandler) _apHandler();
+      }
     }
   }
 
@@ -198,29 +210,27 @@ bool PersWiFiManager::attemptConnection(const String& ssid, const String& pass) 
 } //attemptConnection
 
 void PersWiFiManager::handleWiFi() {
+  // If AP mode and no client connected, close AP mode if the ESP has connected to the router or if time is up
+  if((WiFi.getMode() & WIFI_AP) && (WiFi.softAPgetStationNum() == 0)) {
+    if((WiFi.status() == WL_CONNECTED) || (millis() - _apModeStartMillis > _apModeTimeoutMillis)) closeAp();
+  }
+
   if (!_connectStartTime) return;
 
   if (WiFi.status() == WL_CONNECTED) {
     _connectStartTime = 0;
     if (_connectHandler) _connectHandler();
 
-    // Disable AP mode directly after connection
-    // wifi_mode_t m = WiFi.getMode();
-    // if(m & WIFI_AP) {
-    //   delay(100);
-    //   WiFi.mode(wifi_mode_t(m & ~WIFI_AP));
-    // }
-
     return;
   }
-
+/*
   //if failed or no saved SSID or no WiFi credentials were found or not connected and time is up
   if ((WiFi.status() == WL_CONNECT_FAILED) || _freshConnectionAttempt || ((WiFi.status() != WL_CONNECTED) && ((millis() - _connectStartTime) > (1000 * WIFI_CONNECT_TIMEOUT)))) {
     startApMode();
     _connectStartTime = 0; //reset connect start time
     _freshConnectionAttempt = false;
   }
-
+*/
 } //handleWiFi
 
 void PersWiFiManager::startApMode(){
@@ -236,8 +246,9 @@ void PersWiFiManager::closeAp(){
   if(m & WIFI_AP) {
     delay(100);
     WiFi.mode(wifi_mode_t(m & ~WIFI_AP));
+    if (_apCloseHandler) _apCloseHandler();
   }
-}// clodeAp
+}// closeAp
 
 void PersWiFiManager::setConnectNonBlock(bool b) {
   _connectNonBlock = b;
@@ -357,15 +368,21 @@ void PersWiFiManager::setupWiFiHandlers() {
   });
 #endif
 
+  _server->begin();
 }//setupWiFiHandlers
 
-bool PersWiFiManager::begin(const String& ssid, const String& pass) {
-//#if defined(ESP32)
-  WiFi.mode(WIFI_STA);  // ESP32 needs this before setupWiFiHandlers(). Might be good for ESP8266 too?
-//#endif
+bool PersWiFiManager::begin(const String& ssid, const String& pass, time_t apModeTimeoutSeconds) {
+  _apModeTimeoutMillis = 1000 * apModeTimeoutSeconds;
+  _apModeStartMillis = millis();
+  WiFi.mode(WIFI_STA);
   setupWiFiHandlers();
   return attemptConnection(ssid, pass); //switched order of these two for return
 } //begin
+
+void PersWiFiManager::stop() {
+  _server->stop();
+  _dnsServer->stop();
+}// close
 
 // Remove the WiFi credentials (e.g. for testing purposes)
 void PersWiFiManager::resetSettings() {
@@ -411,4 +428,7 @@ void PersWiFiManager::onAp(WiFiChangeHandlerFunction fn) {
   _apHandler = fn;
 }
 
+void PersWiFiManager::onApClose(WiFiChangeHandlerFunction fn) {
+  _apCloseHandler = fn;
+}
 
