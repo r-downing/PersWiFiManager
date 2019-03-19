@@ -10,7 +10,7 @@
 
 //includes
 #include <PersWiFiManager.h>
-// #include <ArduinoJson.h> // ArduinoJson is a bit of an overkill for this use case
+#include <ArduinoJson.h>
 #if defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESP8266SSDP.h>
@@ -52,7 +52,8 @@ String y;
 //code from fsbrowser example, consolidated.
 bool handleFileRead(String path) {
   DEBUG_PRINT("handlefileread" + path);
-  if (path.endsWith("/")) path += "index.htm";
+//  if (path.endsWith("/")) path += "index.htm";
+  if (path.endsWith("/")) path += "wifi.htm";
   String contentType;
   if (path.endsWith(".htm") || path.endsWith(".html")) contentType = "text/html";
   else if (path.endsWith(".css")) contentType = "text/css";
@@ -113,10 +114,24 @@ void setup() {
   //allows serving of files from SPIFFS
   SPIFFS.begin();
 
-  //reset saved settings, clears WiFi credentials e.g. for testing
-  //persWM.resetSettings();
+  //reset saved settings
+  persWM.resetSettings();
 
+  //make connecting/disconnecting non-blocking
+  persWM.setConnectNonBlock(true);  
+  
   persWM.begin();
+
+  persWM.onConnect([]() {
+    DEBUG_PRINT("wifi connected");
+    DEBUG_PRINT(WiFi.localIP());
+  });
+
+  persWM.onAp([](){
+    DEBUG_PRINT("AP MODE");
+    DEBUG_PRINT(persWM.getApSsid());
+    DEBUG_PRINT(WiFi.softAPIP());
+  });
 
   //serve files from SPIFFS
   server.onNotFound([]() {
@@ -138,7 +153,6 @@ void setup() {
       DEBUG_PRINT("y: "+y);
     } //if
 
-/*
     //build json object of program data
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
@@ -147,9 +161,6 @@ void setup() {
 
     char jsonchar[200];
     json.printTo(jsonchar); //print to char array, takes more memory but sends in one piece
-*/
-    char jsonchar[200];
-    sprintf(jsonchar, "{\"x\":%d,\"y\":\"%s\"}", x, y.c_str()); // Easy alternative for ArduinoJson
     server.send(200, "application/json", jsonchar);
 
   }); //server.on api
@@ -166,10 +177,12 @@ void setup() {
   SSDP.setDeviceType("upnp:rootdevice");
   SSDP.begin();
 
+  server.begin(); // Inconsistency: the DNS server is started from the library and the web server directly from setup()
   DEBUG_PRINT("setup complete.");
 } //void setup
 
 void loop() {
+  persWM.handleWiFi();
   dnsServer.processNextRequest();
   server.handleClient();
 
