@@ -5,4 +5,4 @@ This Persistent WiFi Manager provides a WiFi Settings web interface for ESP8266-
 
 This library and UI was inspired by tzapu's [WiFiManager library](https://github.com/tzapu/WiFiManager). The main difference is that it allows the program to continue functioning normally, even in AP mode. It is also more memory efficient, as it does not have to dynamically build the page, and can serve it from SPIFFS rather than PROGMEM. 
 
-[Full Documentation](http://ryandowning.net/PersWiFiManager)
+[Full Documentation](https://r-downing.github.io/PersWiFiManager/)
