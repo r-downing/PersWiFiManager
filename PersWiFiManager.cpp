@@ -254,6 +254,7 @@ bool PersWiFiManager::begin(const String& ssid, const String& pass) {
 void PersWiFiManager::resetSettings() {
 #if defined(ESP8266)
   WiFi.disconnect();
+  WiFi.persistent(true);
 #elif defined(ESP32)
   wifi_mode_t m = WiFi.getMode();
   if(!(m & WIFI_MODE_STA)) WiFi.mode(WIFI_STA);
